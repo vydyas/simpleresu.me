@@ -84,7 +84,7 @@ export function OpenSourceContributions({ githubId = 'vydyas', limit = 2 }: GitH
   }
 
   return (
-    <Card className="w-full mb-6">
+    <Card className="w-full pb-4">
       <div className="flex flex-row items-center justify-between pb-4">
         <h3 className="text-sm font-semibold pb-2 uppercase">
           Open Source Contribution

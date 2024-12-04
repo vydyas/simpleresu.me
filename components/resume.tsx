@@ -238,7 +238,7 @@ export function Resume({
       default:
         return (
           <Card className={`${wrapperClass} resume-content`}>
-            <div className="h-full overflow-y-auto px-6 border-l-2 border-r-2 border-dashed">{content}</div>
+            <div className="h-full overflow-y-auto px-6 border-2 border-dashed">{content}</div>
           </Card>
         );
     }

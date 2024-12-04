@@ -149,7 +149,7 @@ export default function LandingPage() {
         {/* Main Content */}
         <div className="flex flex-col mt-16 flex-grow overflow-hidden">
           <div className="flex flex-row flex-grow overflow-auto">
-            <main className="flex flex-1 h-screen">
+            <main className="flex flex-1 h-screen bg-muted">
               <div className="flex-1 overflow-y-auto">
                 <SampleResume
                   key={JSON.stringify(userData)}

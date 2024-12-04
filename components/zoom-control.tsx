@@ -13,7 +13,7 @@ interface ZoomControlProps {
 
 export function ZoomControl({ zoom, onZoomChange, onDownload, isDownloading = false }: ZoomControlProps) {
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 flex items-center gap-4">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-3 flex items-center gap-4 border-2">
       <Button
         variant="ghost"
         size="icon"
