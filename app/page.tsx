@@ -1,101 +1,182 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useState, useRef, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { Header } from "@/components/header";
+import { ResumeShimmer } from "@/components/resume-shimmer";
+import { initialUserData } from "@/data/initial-user-data";
+import { ZoomControl } from "@/components/zoom-control";
+import { RightSidebar } from "@/components/right-sidebar";
+import { defaultConfig, ResumeConfig } from "@/lib/resume-config";
+
+const SampleResume = dynamic(() => import("@/components/sample-resume"), {
+  loading: () => <ResumeShimmer />,
+});
+
+interface UserDataField {
+  firstName: string;
+  lastName: string;
+  email: string;
+  headline: string;
+  summary: string;
+  positions: Array<{
+    title: string;
+    company: string;
+    startDate: string;
+    endDate: string;
+    description: string;
+  }>;
+  educations: Array<{
+    schoolName: string;
+    degree: string;
+    fieldOfStudy: string;
+    startDate: string;
+    endDate: string;
+  }>;
+  skills: Array<{
+    name: string;
+  }>;
+}
+
+type ConfigKey = keyof ResumeConfig;
+
+const isValidConfigKey = (key: string): key is ConfigKey => {
+  return Object.keys(defaultConfig).includes(key);
+};
+
+export default function LandingPage() {
+  const [activeTemplate, setActiveTemplate] = useState("default");
+  const [githubId, setGithubId] = useState("vydyas");
+  const [zoom, setZoom] = useState(90);
+  const [config, setConfig] = useState<ResumeConfig>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('resumeConfig');
+      return saved ? JSON.parse(saved) : defaultConfig;
+    }
+    return defaultConfig;
+  });
+
+  const [userData, setUserData] = useState<UserDataField>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('resumeData');
+      return saved ? JSON.parse(saved) : initialUserData;
+    }
+    return initialUserData;
+  });
+
+  const [isDownloading, setIsDownloading] = useState(false);
+  const resumeRef = useRef<{ downloadPDF: () => Promise<void> }>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('resumeData', JSON.stringify(userData));
+      localStorage.setItem('resumeConfig', JSON.stringify(config));
+      localStorage.setItem('resumeTemplate', activeTemplate);
+      localStorage.setItem('resumeGithubId', githubId);
+      localStorage.setItem('resumeZoom', zoom.toString());
+    }
+  }, [userData, config, activeTemplate, githubId, zoom]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTemplate = localStorage.getItem('resumeTemplate');
+      const savedGithubId = localStorage.getItem('resumeGithubId');
+      const savedZoom = localStorage.getItem('resumeZoom');
+
+      if (savedTemplate) setActiveTemplate(savedTemplate);
+      if (savedGithubId) setGithubId(savedGithubId);
+      if (savedZoom) setZoom(parseInt(savedZoom));
+    }
+  }, []);
+
+  const handleGitHubIdSubmit = (id: string) => {
+    setGithubId(id);
+  };
+
+  const handleLinkedInImport = () => {
+    // TODO: Implement LinkedIn import logic
+    console.log('LinkedIn import triggered');
+  };
+
+  const handleConfigChange = (key: unknown, value: boolean) => {
+    const stringKey = String(key);
+    if (!isValidConfigKey(stringKey)) {
+      console.error(`Invalid config key: ${stringKey}`);
+      return;
+    }
+    setConfig(prevConfig => ({
+      ...prevConfig,
+      [stringKey]: value
+    }));
+  };
+
+  const handleUserDataChange = (newData: Partial<UserDataField>) => {
+    setUserData((prevData) => ({
+      ...prevData,
+      ...newData,
+    }));
+  };
+
+  const handleDownload = async () => {
+    if (!resumeRef.current) {
+      console.error('Resume component not ready');
+      return;
+    }
+
+    try {
+      setIsDownloading(true);
+      await resumeRef.current.downloadPDF();
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Failed to download PDF. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <div className="flex h-screen">
+      {/* Header */}
+      <div className="w-full">
+        <Header 
+          activeTemplate={activeTemplate}
+          onTemplateChange={setActiveTemplate}
+          githubId={githubId}
+          onGitHubIdSubmit={handleGitHubIdSubmit}
+          onLinkedInImport={handleLinkedInImport}
         />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        {/* Main Content */}
+        <div className="flex flex-col mt-16 flex-grow overflow-hidden">
+          <div className="flex flex-row flex-grow overflow-auto">
+            <main className="flex flex-1 h-screen">
+              <div className="flex-1 overflow-y-auto">
+                <SampleResume
+                  key={JSON.stringify(userData)}
+                  ref={resumeRef}
+                  template={activeTemplate}
+                  githubId={githubId}
+                  config={config}
+                  userData={userData}
+                  zoom={zoom}
+                />
+                <ZoomControl 
+                  zoom={zoom} 
+                  onZoomChange={setZoom} 
+                  onDownload={handleDownload}
+                  isDownloading={isDownloading}
+                />
+              </div>
+              <RightSidebar
+                config={config}
+                onConfigChange={handleConfigChange}
+                userData={userData}
+                onUserDataChange={handleUserDataChange}
+              />
+            </main>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
