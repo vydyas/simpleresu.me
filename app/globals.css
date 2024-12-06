@@ -99,3 +99,10 @@ body {
 .show-scrollbar-on-hover:hover::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* Reset paragraph margins and paddings for PDF export */
+p {
+  margin: 0;
+  padding: 0;
+  line-height: 1.4;
+}

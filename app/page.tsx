@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { Header } from "@/components/header";
 import { ResumeShimmer } from "@/components/resume-shimmer";
@@ -8,8 +8,10 @@ import { initialUserData } from "@/data/initial-user-data";
 import { ZoomControl } from "@/components/zoom-control";
 import { RightSidebar } from "@/components/right-sidebar";
 import { defaultConfig, ResumeConfig } from "@/lib/resume-config";
+import { ResumeRef } from "@/components/resume";
 
-const SampleResume = dynamic(() => import("@/components/sample-resume"), {
+const Resume = dynamic(() => import("@/components/resume").then((mod) => mod.Resume), {
+  ssr: false,
   loading: () => <ResumeShimmer />,
 });
 
@@ -65,7 +67,14 @@ export default function LandingPage() {
   });
 
   const [isDownloading, setIsDownloading] = useState(false);
-  const resumeRef = useRef<{ downloadPDF: () => Promise<void> }>(null);
+  const [resetResume, setResetResume] = useState<(() => void) | null>(null);
+  const resumeRef = useRef<ResumeRef>(null);
+
+  const handleResetResume = useCallback(() => {
+    if (resetResume) {
+      resetResume();
+    }
+  }, [resetResume]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -151,7 +160,7 @@ export default function LandingPage() {
           <div className="flex flex-row flex-grow overflow-auto">
             <main className="flex flex-1 h-screen bg-muted">
               <div className="flex-1 overflow-y-auto">
-                <SampleResume
+                <Resume
                   key={JSON.stringify(userData)}
                   ref={resumeRef}
                   template={activeTemplate}
@@ -159,12 +168,14 @@ export default function LandingPage() {
                   config={config}
                   userData={userData}
                   zoom={zoom}
+                  onResetResume={(resetFn) => setResetResume(() => resetFn)}
                 />
                 <ZoomControl 
                   zoom={zoom} 
                   onZoomChange={setZoom} 
                   onDownload={handleDownload}
                   isDownloading={isDownloading}
+                  onResetResume={handleResetResume}
                 />
               </div>
               <RightSidebar
