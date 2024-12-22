@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
+import FancyHeading from "./fancy-heading";
 
 interface GitHubRepo {
   id: number;
@@ -36,13 +37,13 @@ export function OpenSourceContributions({ githubId = 'vydyas', limit = 2 }: GitH
       setIsLoading(true);
       try {
         const response = await fetch(`https://api.github.com/users/${githubId}/repos?sort=stars&per_page=100`);
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch repositories');
         }
 
         const data: GitHubRepo[] = await response.json();
-        
+
         // Filter out forked repositories and sort by stars
         const nonForkedRepos = data
           .filter(repo => !repo.fork)
@@ -86,9 +87,9 @@ export function OpenSourceContributions({ githubId = 'vydyas', limit = 2 }: GitH
   return (
     <Card className="w-full pb-4">
       <div className="flex flex-row items-center justify-between pb-4">
-        <h3 className="text-sm font-semibold pb-2 uppercase">
+        <FancyHeading>
           Open Source Contribution
-        </h3>
+        </FancyHeading>
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="outline">Select Repositories</Button>
@@ -120,16 +121,16 @@ export function OpenSourceContributions({ githubId = 'vydyas', limit = 2 }: GitH
       <CardContent>
         <div className="space-y-4">
           {selectedRepos.map((repo) => (
-            <div 
-              key={repo.id} 
+            <div
+              key={repo.id}
               className="border rounded-lg p-4 hover:shadow-md transition-shadow flex items-start space-x-4"
             >
               <div className="flex-grow">
                 <div className="flex justify-between items-center mb-2">
-                  <a 
-                    href={repo.html_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
+                  <a
+                    href={repo.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="font-semibold hover:underline"
                   >
                     {repo.name}

@@ -1,21 +1,32 @@
 "use client";
 
-import React, { forwardRef, useImperativeHandle } from "react";
-import { Card } from "@/components/ui/card";
-import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
-import { DraggableLine } from "./draggable-line";
-import { GitHubRepos } from "./github-repos";
-import { Shimmer } from "@/components/ui/shimmer";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useImperativeHandle,
+} from "react";
+import { DragEndEvent } from "@dnd-kit/core";
+import {
+  arrayMove,
+} from "@dnd-kit/sortable";
 import "../app/custom-styles.css";
-
-interface Position {
-  title: string;
-  company: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-}
+import { Check } from "lucide-react";
+import FancyHeading from "./fancy-heading";
+import { useStyling } from "@/lib/styling-context";
+import { ResumeShimmer } from "./resume-shimmer";
+import { Header } from './resume-sections/header';
+import { Summary } from './resume-sections/summary';
+import { Experience } from './resume-sections/experience';
+import { Education } from './resume-sections/education';
+import { Skills } from './resume-sections/skills';
+import { Projects } from './resume-sections/projects';
+import { DefaultTemplate } from './resume-templates/default';
+import { ModernTemplate } from './resume-templates/modern';
+import Image from 'next/image';
+import { ResumeConfig, UserData } from '@/types/resume';
 
 interface Education {
   schoolName: string;
@@ -25,31 +36,12 @@ interface Education {
   endDate: string;
 }
 
-interface Skill {
-  name: string;
-}
-
-interface UserData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  headline: string;
-  summary: string;
-  positions: Position[];
-  educations: Education[];
-  skills: Skill[];
-}
-
 interface ResumeProps {
-  userData: any;
-  config: any;
-  onUserDataChange?: (newData: any) => void;
+  userData: UserData;
+  config: ResumeConfig;
+  onUserDataChange?: (newData: UserData) => void;
   githubId?: string;
   template?: string;
-  onResetResume?: (resetFn: () => void) => void;
-  onDownloadStart?: () => void;
-  onDownloadComplete?: () => void;
-  onDownloadError?: (error: Error) => void;
   zoom: number;
 }
 
@@ -64,359 +56,292 @@ export interface ResumeRef {
   downloadPDF: () => Promise<void>;
 }
 
-export const Resume = forwardRef<ResumeRef, ResumeProps>(({
-  userData,
-  config,
-  onUserDataChange,
-  githubId,
-  template = "default",
-  onResetResume,
-  onDownloadStart,
-  onDownloadComplete,
-  onDownloadError,
-  zoom,
-}, ref) => {
-  const resumeContainerRef = React.useRef<HTMLDivElement>(null);
-  const [isClient, setIsClient] = React.useState(false);
-  const [lines, setLines] = React.useState<LineItem[]>([]);
-  const [originalLines, setOriginalLines] = React.useState<LineItem[]>([]);
+export const Resume = forwardRef<ResumeRef, ResumeProps>(
+  function Resume(
+    {
+      userData,
+      config,
+      githubId,
+      template = "default",
+      zoom,
+    }: ResumeProps,
+    ref: React.ForwardedRef<ResumeRef>
+  ) {
+    const resumeContainerRef = useRef<HTMLDivElement>(null);
+    const [isClient, setIsClient] = useState(false);
+    const [lines, setLines] = useState<LineItem[]>([]);
+    const [showSaveIndicator, setShowSaveIndicator] = useState(false);
+    const [isFirstLoad, setIsFirstLoad] = useState(true);
 
-  const generateLines = React.useCallback(() => {
-    const newLines: LineItem[] = [];
-    let counter = 0;
+    const { nameFont, nameColor, borderColor, skillsStyle, resumeBackgroundColor } = useStyling();
 
-    // Personal Info
-    newLines.push({
-      id: `line-${counter++}`,
-      content: (
-        <h1 className="text-2xl font-bold">
-          {userData.firstName} {userData.lastName}
-        </h1>
-      ),
-      type: 'header',
-      section: 'personal'
-    });
+    useImperativeHandle(ref, () => ({
+      downloadPDF: async () => {
+        console.log('PDF download requested');
+      }
+    }), []);
 
-    if (userData.email) {
+    const generateLines = useCallback(() => {
+      console.log("Generating lines for:", userData, config);
+      const newLines: LineItem[] = [];
+
+      // Header section
       newLines.push({
-        id: `line-${counter++}`,
-        content: <p className="text-gray-500">{userData.email}</p>,
-        type: 'text',
-        section: 'personal'
-      });
-    }
-
-    if (userData.headline) {
-      newLines.push({
-        id: `line-${counter++}`,
-        content: <p className="text-gray-700">{userData.headline}</p>,
-        type: 'text',
-        section: 'personal'
-      });
-    }
-
-    // Summary
-    if (config.showSummary && userData.summary) {
-      newLines.push({
-        id: `line-${counter++}`,
-        content: <h3 className="text-sm font-semibold pb-2 uppercase">Summary</h3>,
-        type: 'section-header',
-        section: 'summary'
-      });
-      newLines.push({
-        id: `line-${counter++}`,
-        content: <div className="mt-2" dangerouslySetInnerHTML={{ __html: userData.summary }} />,
-        type: 'text',
-        section: 'summary'
-      });
-    }
-
-    // Experience
-    if (config.showExperience && userData.positions?.length > 0) {
-      newLines.push({
-        id: `line-${counter++}`,
-        content: <h3 className="text-sm font-semibold pb-2 uppercase">Experience</h3>,
-        type: 'section-header',
-        section: 'experience'
+        id: `line-${newLines.length}`,
+        content: (
+          <Header 
+            userData={userData}
+            nameFont={nameFont}
+            nameColor={nameColor}
+          />
+        ),
+        type: "header",
+        section: "header",
       });
 
-      userData.positions.forEach((position: any, index: number) => {
+      // Summary section
+      if (config.showSummary && userData.summary) {
         newLines.push({
-          id: `line-exp-title-${index}-${counter++}`,
-          content: <h4 className="font-medium">{position.title}</h4>,
-          type: 'subsection-header',
-          section: 'experience'
+          id: `line-${newLines.length}`,
+          content: <Summary summary={userData.summary} />,
+          type: "summary",
+          section: "summary",
         });
+      }
+
+      // Experience section
+      if (config.showExperience && userData.positions?.length > 0) {
         newLines.push({
-          id: `line-exp-company-${index}-${counter++}`,
-          content: <p className="text-gray-600">{position.company}</p>,
-          type: 'text',
-          section: 'experience'
+          id: `line-${newLines.length}`,
+          content: <Experience positions={userData.positions} />,
+          type: "positions",
+          section: "positions",
         });
+      }
+
+      // Education section
+      if (config.showEducation && userData.educations?.length > 0) {
         newLines.push({
-          id: `line-exp-dates-${index}-${counter++}`,
-          content: (
-            <p className="text-gray-500 text-sm">
-              {position.startDate} - {position.endDate}
-            </p>
-          ),
-          type: 'text',
-          section: 'experience'
+          id: `line-${newLines.length}`,
+          content: <Education educations={userData.educations} />,
+          type: "education",
+          section: "education",
         });
-        if (position.description) {
+      }
+
+      // Skills section
+      if (config.showSkills && userData.skills?.length > 0) {
+        newLines.push({
+          id: `line-${newLines.length}`,
+          content: <Skills skills={userData.skills} style={skillsStyle} />,
+          type: "skills",
+          section: "skills",
+        });
+      }
+
+      // Projects section
+      if (config.showProjects && userData.projects?.length > 0) {
+        newLines.push({
+          id: `line-${newLines.length}`,
+          content: <Projects projects={userData.projects} />,
+          type: "projects",
+          section: "projects",
+        });
+      }
+
+      // Custom sections
+      userData.customSections?.forEach((section) => {
+        if (section.isVisible) {
           newLines.push({
-            id: `line-exp-desc-${index}-${counter++}`,
-            content: <p className="mt-1">{position.description}</p>,
-            type: 'text',
-            section: 'experience'
+            id: `line-${newLines.length}`,
+            content: (
+              <div>
+                <FancyHeading>{section.title}</FancyHeading>
+                <div
+                  className="text-base ml-2 rich-text-content"
+                  dangerouslySetInnerHTML={{ __html: section.content }}
+                />
+              </div>
+            ),
+            type: "custom",
+            section: section.id,
           });
         }
       });
-    }
 
-    // Education
-    if (config.showEducation && userData.educations?.length > 0) {
-      newLines.push({
-        id: `line-${counter++}`,
-        content: <h3 className="text-sm font-semibold pb-2 uppercase">Education</h3>,
-        type: 'section-header',
-        section: 'education'
-      });
+      return newLines;
+    }, [userData, config, nameColor, nameFont, skillsStyle]);
 
-      userData.educations.forEach((education: any, index: number) => {
-        newLines.push({
-          id: `line-edu-school-${index}-${counter++}`,
-          content: <h4 className="font-medium">{education.schoolName}</h4>,
-          type: 'subsection-header',
-          section: 'education'
-        });
-        newLines.push({
-          id: `line-edu-degree-${index}-${counter++}`,
-          content: (
-            <p className="text-gray-600">
-              {education.degree} in {education.fieldOfStudy}
-            </p>
-          ),
-          type: 'text',
-          section: 'education'
-        });
-        newLines.push({
-          id: `line-edu-dates-${index}-${counter++}`,
-          content: (
-            <p className="text-gray-500 text-sm">
-              {education.startDate} - {education.endDate}
-            </p>
-          ),
-          type: 'text',
-          section: 'education'
-        });
-      });
-    }
+    const handleDragEnd = useCallback(
+      (event: DragEndEvent) => {
+        const { active, over } = event;
 
-    // Skills
-    if (config.showSkills && userData.skills?.length > 0) {
-      newLines.push({
-        id: `line-${counter++}`,
-        content: <h3 className="text-sm font-semibold pb-2 uppercase">Skills</h3>,
-        type: 'section-header',
-        section: 'skills'
-      });
+        if (active.id !== over?.id) {
+          setLines((items) => {
+            const oldIndex = items.findIndex((item) => item.id === active.id);
+            const newIndex = items.findIndex((item) => item.id === over?.id);
+            const newItems = arrayMove(items, oldIndex, newIndex);
+            // Save the new order to localStorage
+            const lineOrder = newItems.map((item) => item.id);
+            localStorage.setItem("resumeLineOrder", JSON.stringify(lineOrder));
+            setShowSaveIndicator(true); // Show save indicator
+            setTimeout(() => setShowSaveIndicator(false), 2000); // Hide after 2 seconds
+            return newItems;
+          });
+        }
+      },
+      [setShowSaveIndicator]
+    );
 
-      // Group skills in rows of 3
-      const skillGroups = [];
-      for (let i = 0; i < userData.skills.length; i += 3) {
-        skillGroups.push(userData.skills.slice(i, Math.min(i + 3, userData.skills.length)));
-      }
-
-      skillGroups.forEach((group, groupIndex) => {
-        newLines.push({
-          id: `line-skills-${groupIndex}-${counter++}`,
-          content: (
-            <div className="flex flex-wrap gap-2">
-              {group.map((skill: any, idx: number) => (
-                <span
-                  key={idx}
-                  className="skill-chip bg-muted text-primary px-3 py-1 rounded-full text-sm inline-flex items-center justify-center"
-                >
-                  {skill.name}
-                </span>
-              ))}
-            </div>
-          ),
-          type: 'skills-group',
-          section: 'skills'
-        });
-      });
-    }
-
-    // GitHub Repositories
-    if (config.showRepositories && githubId) {
-      newLines.push({
-        id: `line-${counter++}`,
-        content: <h3 className="text-sm font-semibold pb-2 uppercase">Open Source</h3>,
-        type: 'section-header',
-        section: 'repositories'
-      });
-      newLines.push({
-        id: `line-${counter++}`,
-        content: <GitHubRepos githubId={githubId} />,
-        type: 'component',
-        section: 'repositories'
-      });
-    }
-
-    return newLines;
-  }, [userData, config, githubId]);
-
-  const handleDragEnd = React.useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      setLines((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  }, []);
-
-  const handleReset = React.useCallback(() => {
-    setLines([...originalLines]);
-  }, [originalLines]);
-
-  useImperativeHandle(ref, () => ({
-    downloadPDF: async () => {
-      if (!resumeContainerRef.current) {
-        console.error('Resume container not ready');
-        return;
-      }
-
+    const applyStoredLineOrder = useCallback((generatedLines: LineItem[]) => {
       try {
-        // Dynamically import html2pdf.js
-        const html2pdf = (await import('html2pdf.js')).default;
-        
-        // Create a deep clone of the resume container to manipulate
-        const clonedContainer = resumeContainerRef.current.cloneNode(true) as HTMLDivElement;
-        
-        // Remove any interactive elements or buttons
-        const interactiveElements = clonedContainer.querySelectorAll('button, [contenteditable]');
-        interactiveElements.forEach(el => el.remove());
-
-        // Adjust styles for PDF
-        clonedContainer.style.transform = 'scale(1)';
-        clonedContainer.style.transformOrigin = 'top left';
-        clonedContainer.style.width = '210mm';
-        clonedContainer.style.height = '297mm';
-        clonedContainer.style.margin = '0';
-        clonedContainer.style.padding = '10mm';
-        clonedContainer.style.boxSizing = 'border-box';
-        clonedContainer.style.overflow = 'hidden';
-
-        // Additional styling to control paragraph spacing
-        const paragraphs = clonedContainer.querySelectorAll('p');
-        paragraphs.forEach(p => {
-          (p as HTMLElement).style.margin = '0';
-          (p as HTMLElement).style.padding = '0';
-          (p as HTMLElement).style.lineHeight = '1.2';
-        });
-
-        const opt = {
-          margin: [0, 0, 0, 0],
-          filename: `${userData.firstName}_${userData.lastName}_Resume.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { 
-            scale: 2, 
-            useCORS: true,
-            logging: false,
-            allowTaint: true,
-            scrollX: 0,
-            scrollY: -window.scrollY
-          },
-          jsPDF: { 
-            unit: 'mm', 
-            format: 'a4', 
-            orientation: 'portrait' 
-          },
-          pagebreak: {
-            mode: 'avoid-all'
-          }
-        };
-
-        html2pdf().set(opt).from(clonedContainer).save();
+        const savedOrder = localStorage.getItem("resumeLineOrder");
+        if (savedOrder) {
+          const orderArray = JSON.parse(savedOrder);
+          // Create a map of id to line item for efficient lookup
+          const lineMap = new Map(
+            generatedLines.map((line: LineItem) => [line.id, line])
+          );
+          // Reconstruct lines array based on saved order
+          const orderedLines = orderArray
+            .map((id: string) => lineMap.get(id))
+            .filter(
+              (line: LineItem | undefined): line is LineItem =>
+                line !== undefined
+            );
+          // Add any new lines that weren't in the saved order
+          const newLines = generatedLines.filter(
+            (line: LineItem) => !orderArray.includes(line.id)
+          );
+          return [...orderedLines, ...newLines];
+        }
       } catch (error) {
-        console.error('PDF download failed:', error);
+        console.error("Error loading line order:", error);
       }
+      return generatedLines;
+    }, []);
+
+    useEffect(() => {
+      setIsClient(true);
+    }, []);
+
+    useEffect(() => {
+      if (isClient) {
+        const lines = generateLines();
+        const orderedLines = applyStoredLineOrder(lines);
+        setLines(orderedLines);
+      }
+    }, [isClient, generateLines, applyStoredLineOrder]);
+
+    useEffect(() => {
+      const lines = generateLines();
+      const orderedLines = applyStoredLineOrder(lines);
+      setLines(orderedLines);
+    }, [userData, config, githubId, generateLines, applyStoredLineOrder, nameColor]);
+
+    useEffect(() => {
+      if (isFirstLoad) {
+        setIsFirstLoad(false);
+      }
+    }, [isFirstLoad]);
+
+    if (isFirstLoad) {
+      return <ResumeShimmer />;
     }
-  }), [userData]);
 
-  React.useEffect(() => {
-    setIsClient(true);
-  }, []);
+    const wrapperClass =
+      "mx-auto bg-white overflow-hidden shadow-lg mt-8 mb-8";
+    const zoomStyle = {
+      transform: `scale(${zoom / 100})`,
+      transformOrigin: "top center",
+      width: zoom > 100 ? `${(100 * 100) / zoom}%` : "100%",
+      margin: "0 auto",
+    };
 
-  React.useEffect(() => {
-    if (isClient) {
-      const newLines = generateLines();
-      setLines(newLines);
-      setOriginalLines(newLines);
-    }
-  }, [isClient, generateLines]);
+    const TemplateComponent = template === 'modern' ? ModernTemplate : DefaultTemplate;
 
-  React.useEffect(() => {
-    if (onResetResume) {
-      onResetResume(handleReset);
-    }
-  }, [onResetResume, handleReset]);
-
-  if (!isClient) {
-    return null;
-  }
-
-  const wrapperClass = "w-[210mm] mx-auto bg-white overflow-hidden shadow-lg";
-  const templateClass = template === "modern" ? "p-8" : "";
-
-  return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="resume-container">
-        <div className="resume-content">
-          <Card 
-            ref={resumeContainerRef}
-            className={`${wrapperClass} resume-content`}
-          >
-            <div className="h-full overflow-y-auto px-6 py-8 border-2 border-dashed">
-              <DndContext
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={lines.map(item => item.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {lines.map((line) => (
-                    <DraggableLine key={line.id} id={line.id}>
-                      {line.content}
-                    </DraggableLine>
-                  ))}
-                </SortableContext>
-              </DndContext>
-            </div>
-          </Card>
+    return (
+      <div className="min-h-full resume-container w-[220mm]">
+        <div className="flex justify-center gap-2 my-4">
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <Image
+              src="https://www.google.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Google"
+              className="w-4 h-4"
+            />
+            Google
+          </div>
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-gray-800">
+            <Image
+              src="https://www.microsoft.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Microsoft"
+              className="w-4 h-4"
+            />
+            Microsoft
+          </div>
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-900">
+            <Image
+              src="https://www.facebook.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Meta"
+              className="w-4 h-4"
+            />
+            Meta
+          </div>
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-900">
+            <Image
+              src="https://www.netflix.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Netflix"
+              className="w-4 h-4"
+            />
+            Netflix
+          </div>
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-yelow-100 text-gray-900">
+            <Image
+              src="https://www.apple.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Apple"
+              className="w-4 h-4"
+            />
+            Apple
+          </div>
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-gray-900">
+            <Image
+              src="https://www.salesforce.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Salesforce"
+              className="w-4 h-4"
+            />
+            Salesforce
+          </div>
         </div>
+        <TemplateComponent
+          lines={lines}
+          onDragEnd={handleDragEnd}
+          resumeRef={resumeContainerRef}
+          wrapperClass={wrapperClass}
+          borderColor={borderColor}
+          zoomStyle={zoomStyle}
+          resumeBackgroundColor={resumeBackgroundColor}
+        />
+        {showSaveIndicator && (
+          <div className="fixed top-0 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1 rounded-md transition-opacity shadow-sm z-50">
+            <Check className="w-4 h-4" />
+            <span className="text-sm">Saved</span>
+          </div>
+        )}
       </div>
-      <button onClick={handleReset}>Reset</button>
-    </div>
-  );
-});
+    );
+  }
+);
 
-export function ResumeShimmer() {
-  return (
-    <div className="space-y-4 p-6 bg-white dark:bg-gray-800 rounded-lg">
-      <Shimmer className="h-12 w-3/4" />
-      <Shimmer className="h-6 w-1/2" />
-      <div className="space-y-2">
-        {[1, 2, 3].map((index) => (
-          <Shimmer key={`shimmer-${index}`} className="h-4 w-full" />
-        ))}
-      </div>
-    </div>
-  );
-}
+Resume.displayName = 'Resume';
