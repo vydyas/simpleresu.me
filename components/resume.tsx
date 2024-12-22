@@ -1,33 +1,32 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Card, CardHeader } from "@/components/ui/card";
-import { GitHubRepos } from "./github-repos";
-import { Shimmer } from "@/components/ui/shimmer";
-import "../app/custom-styles.css"; // Make sure this import is present
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from "@dnd-kit/core";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useImperativeHandle,
+} from "react";
+import { DragEndEvent } from "@dnd-kit/core";
 import {
   arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { SortableSection } from "./sortable-section";
-
-interface Position {
-  title: string;
-  company: string;
-  startDate: string;
-  endDate: string;
-  description: string;
-}
+import "../app/custom-styles.css";
+import { Check } from "lucide-react";
+import FancyHeading from "./fancy-heading";
+import { useStyling } from "@/lib/styling-context";
+import { ResumeShimmer } from "./resume-shimmer";
+import { Header } from './resume-sections/header';
+import { Summary } from './resume-sections/summary';
+import { Experience } from './resume-sections/experience';
+import { Education } from './resume-sections/education';
+import { Skills } from './resume-sections/skills';
+import { Projects } from './resume-sections/projects';
+import { DefaultTemplate } from './resume-templates/default';
+import { ModernTemplate } from './resume-templates/modern';
+import Image from 'next/image';
+import { ResumeConfig, UserData } from '@/types/resume';
 
 interface Education {
   schoolName: string;
@@ -37,220 +36,312 @@ interface Education {
   endDate: string;
 }
 
-interface Skill {
-  name: string;
-}
-
-interface UserData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  headline: string;
-  summary: string;
-  positions: Position[];
-  educations: Education[];
-  skills: Skill[];
-}
-
 interface ResumeProps {
   userData: UserData;
-  githubId: string;
-  template: string;
-  config: {
-    showPhoto: boolean;
-    showSummary: boolean;
-    showExperience: boolean;
-    showEducation: boolean;
-    showSkills: boolean;
-    showProjects: boolean;
-    showRepositories: boolean;
-    showAwards: boolean;
-    showLanguages: boolean;
-    showVolunteer: boolean;
-  };
-  onDownloadStart?: () => void;
-  onDownloadComplete?: () => void;
-  onDownloadError?: (error: Error) => void;
+  config: ResumeConfig;
+  onUserDataChange?: (newData: UserData) => void;
+  githubId?: string;
+  template?: string;
+  zoom: number;
 }
 
-export function ResumeShimmer() {
-  return (
-    <div className="space-y-4 p-6 bg-white dark:bg-gray-800 rounded-lg">
-      <Shimmer className="h-12 w-3/4" />
-      <Shimmer className="h-6 w-1/2" />
-      <div className="space-y-2">
-        {[1, 2, 3].map((index) => (
-          <Shimmer key={`shimmer-${index}`} className="h-4 w-full" />
-        ))}
-      </div>
-    </div>
-  );
+interface LineItem {
+  id: string;
+  content: React.ReactNode;
+  type: string;
+  section: string;
 }
 
-export function Resume({
-  userData,
-  githubId,
-  template,
-  config,
-}: ResumeProps) {
-  const [sections, setSections] = useState<Array<{
-    id: string;
-    component: () => React.ReactNode;
-    show: boolean;
-  }>>([]);
+export interface ResumeRef {
+  downloadPDF: () => Promise<void>;
+}
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+export const Resume = forwardRef<ResumeRef, ResumeProps>(
+  function Resume(
+    {
+      userData,
+      config,
+      githubId,
+      template = "default",
+      zoom,
+    }: ResumeProps,
+    ref: React.ForwardedRef<ResumeRef>
+  ) {
+    const resumeContainerRef = useRef<HTMLDivElement>(null);
+    const [isClient, setIsClient] = useState(false);
+    const [lines, setLines] = useState<LineItem[]>([]);
+    const [showSaveIndicator, setShowSaveIndicator] = useState(false);
+    const [isFirstLoad, setIsFirstLoad] = useState(true);
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    
-    if (over && active.id !== over.id) {
-      setSections((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
+    const { nameFont, nameColor, borderColor, skillsStyle, resumeBackgroundColor } = useStyling();
+
+    useImperativeHandle(ref, () => ({
+      downloadPDF: async () => {
+        console.log('PDF download requested');
+      }
+    }), []);
+
+    const generateLines = useCallback(() => {
+      console.log("Generating lines for:", userData, config);
+      const newLines: LineItem[] = [];
+
+      // Header section
+      newLines.push({
+        id: `line-${newLines.length}`,
+        content: (
+          <Header 
+            userData={userData}
+            nameFont={nameFont}
+            nameColor={nameColor}
+          />
+        ),
+        type: "header",
+        section: "header",
       });
+
+      // Summary section
+      if (config.showSummary && userData.summary) {
+        newLines.push({
+          id: `line-${newLines.length}`,
+          content: <Summary summary={userData.summary} />,
+          type: "summary",
+          section: "summary",
+        });
+      }
+
+      // Experience section
+      if (config.showExperience && userData.positions?.length > 0) {
+        newLines.push({
+          id: `line-${newLines.length}`,
+          content: <Experience positions={userData.positions} />,
+          type: "positions",
+          section: "positions",
+        });
+      }
+
+      // Education section
+      if (config.showEducation && userData.educations?.length > 0) {
+        newLines.push({
+          id: `line-${newLines.length}`,
+          content: <Education educations={userData.educations} />,
+          type: "education",
+          section: "education",
+        });
+      }
+
+      // Skills section
+      if (config.showSkills && userData.skills?.length > 0) {
+        newLines.push({
+          id: `line-${newLines.length}`,
+          content: <Skills skills={userData.skills} style={skillsStyle} />,
+          type: "skills",
+          section: "skills",
+        });
+      }
+
+      // Projects section
+      if (config.showProjects && userData.projects?.length > 0) {
+        newLines.push({
+          id: `line-${newLines.length}`,
+          content: <Projects projects={userData.projects} />,
+          type: "projects",
+          section: "projects",
+        });
+      }
+
+      // Custom sections
+      userData.customSections?.forEach((section) => {
+        if (section.isVisible) {
+          newLines.push({
+            id: `line-${newLines.length}`,
+            content: (
+              <div>
+                <FancyHeading>{section.title}</FancyHeading>
+                <div
+                  className="text-base ml-2 rich-text-content"
+                  dangerouslySetInnerHTML={{ __html: section.content }}
+                />
+              </div>
+            ),
+            type: "custom",
+            section: section.id,
+          });
+        }
+      });
+
+      return newLines;
+    }, [userData, config, nameColor, nameFont, skillsStyle]);
+
+    const handleDragEnd = useCallback(
+      (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (active.id !== over?.id) {
+          setLines((items) => {
+            const oldIndex = items.findIndex((item) => item.id === active.id);
+            const newIndex = items.findIndex((item) => item.id === over?.id);
+            const newItems = arrayMove(items, oldIndex, newIndex);
+            // Save the new order to localStorage
+            const lineOrder = newItems.map((item) => item.id);
+            localStorage.setItem("resumeLineOrder", JSON.stringify(lineOrder));
+            setShowSaveIndicator(true); // Show save indicator
+            setTimeout(() => setShowSaveIndicator(false), 2000); // Hide after 2 seconds
+            return newItems;
+          });
+        }
+      },
+      [setShowSaveIndicator]
+    );
+
+    const applyStoredLineOrder = useCallback((generatedLines: LineItem[]) => {
+      try {
+        const savedOrder = localStorage.getItem("resumeLineOrder");
+        if (savedOrder) {
+          const orderArray = JSON.parse(savedOrder);
+          // Create a map of id to line item for efficient lookup
+          const lineMap = new Map(
+            generatedLines.map((line: LineItem) => [line.id, line])
+          );
+          // Reconstruct lines array based on saved order
+          const orderedLines = orderArray
+            .map((id: string) => lineMap.get(id))
+            .filter(
+              (line: LineItem | undefined): line is LineItem =>
+                line !== undefined
+            );
+          // Add any new lines that weren't in the saved order
+          const newLines = generatedLines.filter(
+            (line: LineItem) => !orderArray.includes(line.id)
+          );
+          return [...orderedLines, ...newLines];
+        }
+      } catch (error) {
+        console.error("Error loading line order:", error);
+      }
+      return generatedLines;
+    }, []);
+
+    useEffect(() => {
+      setIsClient(true);
+    }, []);
+
+    useEffect(() => {
+      if (isClient) {
+        const lines = generateLines();
+        const orderedLines = applyStoredLineOrder(lines);
+        setLines(orderedLines);
+      }
+    }, [isClient, generateLines, applyStoredLineOrder]);
+
+    useEffect(() => {
+      const lines = generateLines();
+      const orderedLines = applyStoredLineOrder(lines);
+      setLines(orderedLines);
+    }, [userData, config, githubId, generateLines, applyStoredLineOrder, nameColor]);
+
+    useEffect(() => {
+      if (isFirstLoad) {
+        setIsFirstLoad(false);
+      }
+    }, [isFirstLoad]);
+
+    if (isFirstLoad) {
+      return <ResumeShimmer />;
     }
-  };
 
-  useEffect(() => {
-    const renderPersonalInfo = () => (
-      <CardHeader className="flex items-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold uppercase">
-            {userData.firstName} {userData.lastName}
-          </h1>
-          <p className="text-gray-500">{userData.email}</p>
-          <p className="text-gray-700 mt-2">{userData.headline}</p>
-        </div>
-      </CardHeader>
-    );
+    const wrapperClass =
+      "mx-auto bg-white overflow-hidden shadow-lg mt-8 mb-8";
+    const zoomStyle = {
+      transform: `scale(${zoom / 100})`,
+      transformOrigin: "top center",
+      width: zoom > 100 ? `${(100 * 100) / zoom}%` : "100%",
+      margin: "0 auto",
+    };
 
-    const renderSummary = () => (
-      <div>
-        <h3 className="text-sm font-semibold pb-2 uppercase">Summary</h3>
-        <div dangerouslySetInnerHTML={{ __html: userData.summary }} />
-      </div>
-    );
+    const TemplateComponent = template === 'modern' ? ModernTemplate : DefaultTemplate;
 
-    const renderExperience = () => (
-      <div>
-        <h3 className="text-sm font-semibold pb-2 uppercase">Experience</h3>
-        {userData.positions.map((position, index) => (
-          <div key={index} className="mb-2">
-            <h4 className="font-medium">{position.title}</h4>
-            <p className="text-gray-600">{position.company}</p>
-            <p className="text-gray-500 text-sm">
-              {position.startDate} - {position.endDate}
-            </p>
-            <p className="mt-1">{position.description}</p>
+    return (
+      <div className="min-h-full resume-container w-[220mm]">
+        <div className="flex justify-center gap-2 my-4">
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            <Image
+              src="https://www.google.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Google"
+              className="w-4 h-4"
+            />
+            Google
           </div>
-        ))}
-      </div>
-    );
-
-    const renderEducation = () => (
-      <div>
-        <h3 className="text-sm font-semibold pb-2 uppercase">Education</h3>
-        {userData.educations.map((education, index) => (
-          <div key={index} className="mb-2">
-            <h4 className="font-medium">{education.schoolName}</h4>
-            <p className="text-gray-600">
-              {education.degree} in {education.fieldOfStudy}
-            </p>
-            <p className="text-gray-500 text-sm">
-              {education.startDate} - {education.endDate}
-            </p>
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-gray-800">
+            <Image
+              src="https://www.microsoft.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Microsoft"
+              className="w-4 h-4"
+            />
+            Microsoft
           </div>
-        ))}
-      </div>
-    );
-
-    const renderSkills = () => (
-      <div>
-        <h3 className="text-sm font-semibold pb-2 uppercase">Skills</h3>
-        <div className="flex flex-wrap gap-2">
-          {userData.skills.map((skill, index) => (
-            <span
-              key={`skill-${index}`}
-              className="skill-chip bg-muted text-primary px-3 py-1 rounded-full text-sm inline-flex items-center justify-center"
-            >
-              {skill.name}
-            </span>
-          ))}
-        </div>
-      </div>
-    );
-
-    setSections([
-      { id: 'personal-info', component: renderPersonalInfo, show: true },
-      { id: 'summary', component: renderSummary, show: config.showSummary },
-      { id: 'experience', component: renderExperience, show: config.showExperience },
-      { id: 'education', component: renderEducation, show: config.showEducation },
-      { id: 'skills', component: renderSkills, show: config.showSkills },
-      { id: 'repositories', component: () => config.showRepositories ? (
-        <div>
-          <GitHubRepos githubId={githubId} />
-        </div>
-      ) : null, show: config.showRepositories },
-    ]);
-  }, [config, userData, githubId]);
-
-  const renderTemplate = () => {
-    const content = (
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={sections.map((s) => s.id)}>
-          <div className="space-y-2">
-            {sections.map(
-              (section) =>
-                section.show && (
-                  <SortableSection key={section.id} id={section.id}>
-                    <div className="border-b-2 relative group transition-all duration-200 hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:ring-2 hover:ring-blue-400 p-2 hover:cursor-grab active:cursor-grabbing">
-                      {section.component()}
-                    </div>
-                  </SortableSection>
-                )
-            )}
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-900">
+            <Image
+              src="https://www.facebook.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Meta"
+              className="w-4 h-4"
+            />
+            Meta
           </div>
-        </SortableContext>
-      </DndContext>
-    );
-
-    const wrapperClass = "w-[210mm] mx-auto bg-white overflow-hidden shadow-lg";
-    const templateClass = template === "modern" ? "p-8" : "";
-
-    switch (template) {
-      case "modern":
-        return (
-          <div className={`${wrapperClass} resume-content ${templateClass}`}>
-            <div className="h-full">{content}</div>
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-900">
+            <Image
+              src="https://www.netflix.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Netflix"
+              className="w-4 h-4"
+            />
+            Netflix
           </div>
-        );
-      default:
-        return (
-          <Card className={`${wrapperClass} resume-content`}>
-            <div className="h-full overflow-y-auto px-6 border-2 border-dashed">{content}</div>
-          </Card>
-        );
-    }
-  };
-
-  return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="resume-container">
-        <div className="resume-content">
-          {renderTemplate()}
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-yelow-100 text-gray-900">
+            <Image
+              src="https://www.apple.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Apple"
+              className="w-4 h-4"
+            />
+            Apple
+          </div>
+          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-gray-900">
+            <Image
+              src="https://www.salesforce.com/favicon.ico"
+              width={16}
+              height={16}
+              alt="Salesforce"
+              className="w-4 h-4"
+            />
+            Salesforce
+          </div>
         </div>
+        <TemplateComponent
+          lines={lines}
+          onDragEnd={handleDragEnd}
+          resumeRef={resumeContainerRef}
+          wrapperClass={wrapperClass}
+          borderColor={borderColor}
+          zoomStyle={zoomStyle}
+          resumeBackgroundColor={resumeBackgroundColor}
+        />
+        {showSaveIndicator && (
+          <div className="fixed top-0 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1 rounded-md transition-opacity shadow-sm z-50">
+            <Check className="w-4 h-4" />
+            <span className="text-sm">Saved</span>
+          </div>
+        )}
       </div>
-    </div>
-  );
-}
+    );
+  }
+);
+
+Resume.displayName = 'Resume';
