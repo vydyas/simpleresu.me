@@ -2,13 +2,15 @@ import { Metadata } from 'next';
 
 const defaultMetadata: Metadata = {
   title: {
-    default: 'SimpleResume - Professional Resume Builder',
+    default: 'Build Job-Winning Resumes for the Tech Industry | SimpleResume',
     template: '%s | SimpleResume'
   },
-  description: 'Create professional resumes instantly with SimpleResume. Free online resume builder with modern templates, AI assistance, and easy customization.',
+  description: 'Create professional resumes tailored for the tech industry, including FAANG and MAANG companies. Stand out with SimpleResume’s modern templates and AI assistance.',
   keywords: [
     'resume builder',
-    'cv maker',
+    'tech industry resumes',
+    'FAANG resumes',
+    'MAANG resumes',
     'professional resume',
     'job application',
     'career tools',
@@ -22,21 +24,14 @@ const defaultMetadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: 'https://simpleresu.me',
     siteName: 'SimpleResume',
-    title: 'SimpleResume - Professional Resume Builder',
-    description: 'Create professional resumes instantly with SimpleResume. Free online resume builder with modern templates.',
+    title: 'Build Job-Winning Resumes for the Tech Industry | SimpleResume',
+    description: 'Create professional resumes tailored for the tech industry, including FAANG and MAANG companies.',
     images: [
       {
         url: 'https://simpleresu.me/og-image.png',
@@ -48,8 +43,8 @@ const defaultMetadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SimpleResume - Professional Resume Builder',
-    description: 'Create professional resumes instantly with SimpleResume',
+    title: 'Build Job-Winning Resumes for the Tech Industry | SimpleResume',
+    description: 'Create professional resumes tailored for the tech industry, including FAANG and MAANG companies.',
     images: ['https://simpleresu.me/twitter-image.png'],
     creator: '@simpleresu_me',
   },
