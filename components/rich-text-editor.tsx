@@ -3,6 +3,9 @@
 import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from '@tiptap/extension-link';
+import BulletList from '@tiptap/extension-bullet-list';
+import OrderedList from '@tiptap/extension-ordered-list';
+import ListItem from '@tiptap/extension-list-item';
 import { Button } from "@/components/ui/button";
 import {
   Bold,
@@ -29,13 +32,27 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        bulletList: false,  // Disable default bulletList to use our custom config
+        orderedList: false, // Disable default orderedList to use our custom config
+      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
           class: 'text-primary hover:underline cursor-pointer',
         },
       }),
+      BulletList.configure({
+        HTMLAttributes: {
+          class: 'list-disc ml-4 space-y-1',
+        },
+      }),
+      OrderedList.configure({
+        HTMLAttributes: {
+          class: 'list-decimal ml-4 space-y-1',
+        },
+      }),
+      ListItem,
     ],
     content: content,
     editable: editable,
@@ -167,7 +184,7 @@ export function RichTextEditor({
       )}
       <EditorContent
         editor={editor}
-        className="min-h-[150px] text-sm border rounded-md p-3 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2"
+        className="min-h-[150px] text-sm border rounded-md p-3 focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 [&_.ProseMirror>ul]:list-disc [&_.ProseMirror>ul]:ml-4 [&_.ProseMirror>ol]:list-decimal [&_.ProseMirror>ol]:ml-4"
       />
     </div>
   );

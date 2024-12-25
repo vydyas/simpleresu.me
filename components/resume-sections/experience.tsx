@@ -32,7 +32,7 @@ export function Experience({ positions }: ExperienceProps) {
                 {position.startDate} - {position.endDate}
               </div>
             </div>
-            <div className="text-sm rich-text-content ml-6" dangerouslySetInnerHTML={{ __html: position.description }} />
+            <div className="text-sm rich-text-content ml-2" dangerouslySetInnerHTML={{ __html: position.description }} />
           </div>
         ))}
       </div>

@@ -1,4 +1,4 @@
-import { Github, Linkedin } from "lucide-react";
+import { Github, Linkedin, MapPin, Phone, Mail } from "lucide-react";
 
 interface HeaderProps {
   userData: {
@@ -30,20 +30,34 @@ export function Header({ userData, nameColor }: HeaderProps) {
           {/* Contact Info */}
           {userData.email && (
             <div className="flex items-center gap-1">
-              <span>{userData.email}</span>
+              <Mail className="w-4 h-4" />
+              <a 
+                href={`mailto:${userData.email}`}
+                className="hover:text-primary transition-colors cursor-pointer select-all"
+                title="Click to copy or send email"
+              >
+                {userData.email}
+              </a>
             </div>
           )}
           {userData.phoneNumber && (
             <div className="flex items-center gap-1">
-              <span>• {userData.phoneNumber}</span>
+              • <Phone className="w-4 h-4" />
+              <a 
+                href={`tel:${userData.phoneNumber}`}
+                className="hover:text-primary transition-colors cursor-pointer select-all"
+                title="Click to copy or call"
+              >
+                {userData.phoneNumber}
+              </a>
             </div>
           )}
           {userData.location && (
             <div className="flex items-center gap-1">
-              <span>• {userData.location}</span>
+              • <MapPin className="w-4 h-4" />
+              <span className="select-all">{userData.location}</span>
             </div>
           )}
-          {/* Social Links */}
           {userData.githubId && (
             <div className="flex items-center gap-1">
               <span>
@@ -51,10 +65,10 @@ export function Header({ userData, nameColor }: HeaderProps) {
                   href={`https://github.com/${userData.githubId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1"
+                  className="flex items-center gap-1 hover:text-primary transition-colors"
                 >
                   • <Github className="w-4 h-4" />
-                  {userData.githubId}
+                  Github
                 </a>
               </span>
             </div>
@@ -66,10 +80,10 @@ export function Header({ userData, nameColor }: HeaderProps) {
                   href={`https://www.linkedin.com/in/${userData.linkedinId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1"
+                  className="flex items-center gap-1 hover:text-primary transition-colors"
                 >
                   • <Linkedin className="w-4 h-4" />
-                  {userData.linkedinId}
+                  LinkedIn
                 </a>
               </span>
             </div>
