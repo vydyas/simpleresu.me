@@ -20,13 +20,16 @@ export default function RootLayout({
         <meta name="description" content="Create professional resumes tailored for the tech industry, including FAANG and MAANG companies." />
         <meta name="keywords" content="resume builder, tech industry resumes, FAANG resumes, MAANG resumes, professional resume, job application, career tools, resume templates, online resume, free resume builder" />
         <meta name="viewport" content="width=1280, initial-scale=0.3" />
-        {/* Add Open Graph and Twitter meta tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+
         <meta property="og:title" content="Build Job-Winning Resumes for the Tech Industry | SimpleResu.me Resume Builder" />
         <meta property="og:description" content="Create professional resumes tailored for the tech industry, including FAANG and MAANG companies." />
         <meta property="og:url" content="https://simpleresu.me" />
+        <meta property="og:image" content="https://github.com/user-attachments/assets/95d817d8-6d61-41a3-8298-7d57fddec1cd" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Build Job-Winning Resumes for the Tech Industry | SimpleResu.me Resume Builder" />
         <meta name="twitter:description" content="Create professional resumes tailored for the tech industry, including FAANG and MAANG companies." />
+        <meta name="twitter:image" content="https://github.com/user-attachments/assets/95d817d8-6d61-41a3-8298-7d57fddec1cd" />
         {/* Add any other necessary meta tags */}
       </head>
       <body className={inter.className}>
