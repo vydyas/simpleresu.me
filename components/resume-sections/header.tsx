@@ -25,7 +25,7 @@ export function Header({ userData, nameColor }: HeaderProps) {
       {userData.headline && (
         <p className="text-gray-600 mt-1 text-lg">{userData.headline}</p>
       )}
-      <div className="flex justify-center gap-4 mt-2 text-base text-gray-600 flex-wrap mb-2">
+      <div className="flex justify-center gap-4 mt-1 text-base text-gray-600 flex-wrap mb-2">
         <div className="flex items-center gap-1 text-base">
           {/* Contact Info */}
           {userData.email && (

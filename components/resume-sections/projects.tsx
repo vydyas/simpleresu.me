@@ -33,7 +33,7 @@ export function Projects({ projects }: ProjectsProps) {
                 )}
               </div>
               <div
-                className="text-base rich-text-content"
+                className="text-sm rich-text-content"
                 dangerouslySetInnerHTML={{ __html: project.description }}
               />
             </div>

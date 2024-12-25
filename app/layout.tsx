@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { Inter } from 'next/font/google';
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -7,17 +6,6 @@ import { Analytics } from "@vercel/analytics/react";
 
 // Initialize the Inter font
 const inter = Inter({ subsets: ['latin'] });
-
-export const metadata: Metadata = {
-  title: "Resume Builder",
-  description: "Build your professional resume",
-  themeColor: 'white',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
-};
 
 export default function RootLayout({
   children,
@@ -31,6 +19,7 @@ export default function RootLayout({
         <title>Build Job-Winning Resumes for the Tech Industry | SimpleResu.me Resume Builder</title>
         <meta name="description" content="Create professional resumes tailored for the tech industry, including FAANG and MAANG companies." />
         <meta name="keywords" content="resume builder, tech industry resumes, FAANG resumes, MAANG resumes, professional resume, job application, career tools, resume templates, online resume, free resume builder" />
+        <meta name="viewport" content="width=1280, initial-scale=0.3" />
         {/* Add Open Graph and Twitter meta tags */}
         <meta property="og:title" content="Build Job-Winning Resumes for the Tech Industry | SimpleResu.me Resume Builder" />
         <meta property="og:description" content="Create professional resumes tailored for the tech industry, including FAANG and MAANG companies." />

@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { Settings, Printer } from 'lucide-react';
+import { Settings, Printer, Minus, Plus } from 'lucide-react';
 import { GlobalSettings } from './global-settings';
 
 interface FloatingControlsProps {
@@ -54,6 +53,18 @@ export function FloatingControls({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isSettingsOpen]);
 
+  const handleZoomIn = () => {
+    if (zoom < 110) {
+      onZoomChange(zoom + 10);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (zoom > 50) {
+      onZoomChange(zoom - 10);
+    }
+  };
+
   return (
     <div className="floating-controls">
       <div className={`
@@ -68,15 +79,29 @@ export function FloatingControls({
         transition-all duration-300
       `}>
         {/* Zoom Controls */}
-        <Slider
-          value={[zoom]}
-          onValueChange={(value) => onZoomChange(value[0])}
-          min={50}
-          max={200}
-          step={10}
-          className="w-20"
-        />
-        <span className="text-sm w-12 text-center">{zoom}%</span>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleZoomOut}
+            disabled={zoom <= 50}
+            size="icon"
+            variant="outline"
+            className="w-8 h-8"
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+          <span className="text-sm text-gray-500 min-w-[48px] text-center">
+            {zoom}%
+          </span>
+          <Button
+            onClick={handleZoomIn}
+            disabled={zoom >= 110}
+            size="icon"
+            variant="outline"
+            className="w-8 h-8"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
 
         <Separator orientation="vertical" className="h-6" />
 

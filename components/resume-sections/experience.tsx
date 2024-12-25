@@ -19,7 +19,7 @@ export function Experience({ positions }: ExperienceProps) {
   return (
     <div>
       <FancyHeading>Experience</FancyHeading>
-      <div className="space-y-4 ml-2">
+      <div className="space-y-2 ml-2">
         {positions.map((position, index) => (
           <div key={index} className="space-y-1">
             <div className="flex justify-between items-center">
