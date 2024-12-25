@@ -108,7 +108,7 @@ export default function LandingPage() {
 
   return (
     <ErrorBoundary>
-      <div className="flex bg-muted h-screen">
+      <div className="flex bg-white h-screen">
         <PanelGroup direction="horizontal">
           <Panel defaultSize={60} minSize={50}>
             <div className="flex justify-center flex-col items-center">

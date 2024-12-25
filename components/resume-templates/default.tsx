@@ -34,7 +34,7 @@ export function DefaultTemplate({
             backgroundColor: resumeBackgroundColor || '#ffffff'
           }}
         >
-          <div className="h-full overflow-y-auto px-4 py-2">
+          <div className="h-full overflow-y-auto px-4 py-2 border border-solid">
             <DndContext onDragEnd={onDragEnd}>
               <SortableContext
                 items={lines.map((item) => item.id)}
