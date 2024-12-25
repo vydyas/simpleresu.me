@@ -15,7 +15,6 @@ import { Trash2, Plus, Pencil, ArrowUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Eye, EyeOff } from "lucide-react";
 import { ResumeConfig, isValidConfigKey } from "@/lib/resume-config";
-import { Linkedin } from "lucide-react";
 import debounce from "lodash/debounce";
 import { FloatingControls } from './floating-controls';
 
@@ -293,10 +292,10 @@ export function RightSidebar({
               </h1>
             </div>
             <div className="flex items-center gap-2">
-              <Button className="bg-gradient-to-r from-[#0077B5] to-[#006699] text-white font-medium rounded-xl shadow-lg transition-all duration-500 ease-out transform hover:scale-105 hover:shadow-[#0077B5]/20 hover:shadow-xl backdrop-blur-lg border border-white/20 group-hover:scale-105">
+              {/* <Button className="bg-gradient-to-r from-[#0077B5] to-[#006699] text-white font-medium rounded-xl shadow-lg transition-all duration-500 ease-out transform hover:scale-105 hover:shadow-[#0077B5]/20 hover:shadow-xl backdrop-blur-lg border border-white/20 group-hover:scale-105">
                 <Linkedin className="w-4 h-4 mr-2" />
                 Import from Linkedin
-              </Button>
+              </Button> */}
             </div>
           </div>
         </div>
