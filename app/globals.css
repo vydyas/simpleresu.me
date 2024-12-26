@@ -324,3 +324,33 @@ input[type="color"]::-moz-color-swatch {
     box-shadow: none !important;
   }
 }
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.animate-ripple {
+  animation: ripple 0.5s linear;
+}
+
+@keyframes attention-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.animate-attention {
+  animation: attention-pulse 1s ease-in-out;
+}

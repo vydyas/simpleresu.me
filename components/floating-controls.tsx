@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Settings, Printer, Minus, Plus } from 'lucide-react';
 import { GlobalSettings } from './global-settings';
+import { RippleButton } from './ui/ripple-button';
 
 interface FloatingControlsProps {
   zoom: number;
@@ -106,15 +107,15 @@ export function FloatingControls({
         <Separator orientation="vertical" className="h-6" />
 
         {/* Print Button */}
-        <Button
+        <RippleButton
           variant="ghost"
           size="icon"
           onClick={() => window.print()}
-          className="flex items-center gap-2"
+          className="relative overflow-hidden w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800"
           title="Print Resume"
         >
           <Printer className="h-4 w-4" />
-        </Button>
+        </RippleButton>
 
         <Separator orientation="vertical" className="h-6" />
 

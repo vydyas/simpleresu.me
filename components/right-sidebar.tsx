@@ -17,6 +17,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { ResumeConfig, isValidConfigKey } from "@/lib/resume-config";
 import debounce from "lodash/debounce";
 import { FloatingControls } from './floating-controls';
+import { OnlineUsers } from './online-users';
+import { ResumeScore } from './resume-score';
 
 interface CustomSection {
   id: string;
@@ -281,22 +283,98 @@ export function RightSidebar({
     });
   };
 
+  // Calculate resume score
+  const calculateResumeScore = () => {
+    let score = 0;
+    let totalPossibleScore = 0;
+
+    // Basic info checks (10 points)
+    totalPossibleScore += 10;
+    if (userData.firstName && userData.lastName) score += 4;
+    if (userData.email) score += 2;
+    if (userData.phoneNumber) score += 2;
+    if (userData.location) score += 2;
+
+    // Professional summary (25 points)
+    if (userData.summary) {
+      totalPossibleScore += 25;
+      if (config.showSummary && userData.summary.trim()) { // Only award points if section is visible and has content
+        score += 25;
+      }
+    }
+
+    // Experience section (35 points)
+    if (userData.positions.length > 0) {
+      totalPossibleScore += 35;
+      if (config.showExperience) {
+        // Points for having positions
+        score += 20;
+        // Additional points for descriptions
+        userData.positions.forEach(position => {
+          if (position.description?.trim()) {
+            score += 5;
+          }
+        });
+      }
+    }
+
+    // Skills section (15 points)
+    if (userData.skills.length > 0) {
+      totalPossibleScore += 15;
+      if (config.showSkills) {
+        score += 15; // Full points for having any skills
+      }
+    }
+
+    // Projects section (15 points)
+    if (userData.projects && userData.projects.length > 0) {
+      totalPossibleScore += 15;
+      if (config.showProjects) {
+        score += 10; // Points for having projects
+        // Additional points for descriptions
+        if (userData.projects.some(project => project.description?.trim())) {
+          score += 5;
+        }
+      }
+    }
+
+    // Education section (5 points)
+    if (userData.educations.length > 0) {
+      totalPossibleScore += 5;
+      if (config.showEducation) {
+        score += 5;
+      }
+    }
+
+    // Custom sections (5 points each)
+    if (userData.customSections) {
+      userData.customSections.forEach(section => {
+        if (section.content.trim()) {
+          totalPossibleScore += 5;
+          if (section.isVisible) {
+            score += 5;
+          }
+        }
+      });
+    }
+
+    // Prevent division by zero
+    if (totalPossibleScore === 0) return 0;
+    
+    return Math.round((score / totalPossibleScore) * 100);
+  };
+
+  const resumeScore = calculateResumeScore();
+
   return (
     <div className="bg-background shadow-md h-screen flex flex-col right-sidebar">
       <div className="p-4">
         <div className="rounded-2xl bg-white/60 shadow-lg backdrop-blur-xl border border-white/40 p-4 mx-auto transition-all duration-300 bg-white/70 dark:bg-white/20 dark:bg-white/30 shadow-xl group border-b-4 border-purple-600">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent whitespace-nowrap transition-transform duration-500 ease-out group-hover:scale-105">
-                simpleresu.me
-              </h1>
-            </div>
-            <div className="flex items-center gap-2">
-              {/* <Button className="bg-gradient-to-r from-[#0077B5] to-[#006699] text-white font-medium rounded-xl shadow-lg transition-all duration-500 ease-out transform hover:scale-105 hover:shadow-[#0077B5]/20 hover:shadow-xl backdrop-blur-lg border border-white/20 group-hover:scale-105">
-                <Linkedin className="w-4 h-4 mr-2" />
-                Import from Linkedin
-              </Button> */}
-            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent whitespace-nowrap transition-transform duration-500 ease-out group-hover:scale-105">
+              simpleresu.me
+            </h1>
+            <OnlineUsers />
           </div>
         </div>
       </div>
@@ -1086,6 +1164,7 @@ export function RightSidebar({
             </div>
           </Button>
         </div>
+        <ResumeScore score={resumeScore} />
       </div>
     </div>
   );
