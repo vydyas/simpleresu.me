@@ -25,7 +25,7 @@ import { Skills } from './resume-sections/skills';
 import { Projects } from './resume-sections/projects';
 import { DefaultTemplate } from './resume-templates/default';
 import { ModernTemplate } from './resume-templates/modern';
-import Image from 'next/image';
+// import Image from 'next/image';
 import { ResumeConfig, UserData } from '@/types/resume';
 
 interface Education {
@@ -262,7 +262,7 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
 
     return (
       <div className="min-h-full resume-container w-[220mm]">
-        <div className="flex justify-center gap-2 my-4">
+        {/* <div className="flex justify-center gap-2 my-4">
           <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
             <Image
               src="https://www.google.com/favicon.ico"
@@ -323,7 +323,7 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
             />
             Salesforce
           </div>
-        </div>
+        </div> */}
         <TemplateComponent
           lines={lines}
           onDragEnd={handleDragEnd}
