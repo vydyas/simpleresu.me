@@ -33,6 +33,7 @@
     "@tiptap/react": "^2.10.2",
     "@tiptap/starter-kit": "^2.10.2",
     "@vercel/analytics": "^1.4.1",
+    "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
@@ -52,6 +53,7 @@
     "vaul": "^1.1.1"
   },
   "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
     "@types/lodash": "^4.17.13",
     "@types/node": "^20",
     "@types/react": "^18",

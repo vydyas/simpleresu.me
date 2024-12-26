@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { Settings, Printer, Minus, Plus } from 'lucide-react';
 import { GlobalSettings } from './global-settings';
 import { RippleButton } from './ui/ripple-button';
+import { fireConfetti } from '@/lib/confetti';
 
 interface FloatingControlsProps {
   zoom: number;
@@ -66,6 +67,15 @@ export function FloatingControls({
     }
   };
 
+  const handlePrint = async () => {
+    try {
+      await window.print();
+      fireConfetti(); // Fire confetti after successful print
+    } catch (error) {
+      console.error('Print failed:', error);
+    }
+  };
+
   return (
     <div className="floating-controls">
       <div className={`
@@ -110,7 +120,7 @@ export function FloatingControls({
         <RippleButton
           variant="ghost"
           size="icon"
-          onClick={() => window.print()}
+          onClick={handlePrint}
           className="relative overflow-hidden w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800"
           title="Print Resume"
         >
