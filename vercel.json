@@ -1,0 +1,11 @@
+{
+  "build": {
+    "env": {
+      "YARN_CACHE_FOLDER": ".yarn-cache"
+    }
+  },
+  "cacheDirectories": [
+    ".next/cache",
+    ".yarn-cache"
+  ]
+} 

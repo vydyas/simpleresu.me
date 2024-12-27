@@ -25,6 +25,13 @@ import { Skills } from './resume-sections/skills';
 import { Projects } from './resume-sections/projects';
 import { DefaultTemplate } from './resume-templates/default';
 import { ModernTemplate } from './resume-templates/modern';
+import { TwoColumnTemplate } from './resume-templates/two-column';
+import { TwoColumnHeader } from './resume-templates/two-column/header';
+import { TwoColumnSummary } from './resume-templates/two-column/summary';
+import { TwoColumnExperience } from './resume-templates/two-column/experience';
+import { TwoColumnEducation } from './resume-templates/two-column/education';
+import { TwoColumnSkills } from './resume-templates/two-column/skills';
+import { TwoColumnProjects } from './resume-templates/two-column/projects';
 // import Image from 'next/image';
 import { ResumeConfig, UserData } from '@/types/resume';
 
@@ -88,13 +95,13 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
       // Header section
       newLines.push({
         id: `line-${newLines.length}`,
-        content: (
-          <Header 
-            userData={userData}
-            nameFont={nameFont}
-            nameColor={nameColor}
-          />
-        ),
+        content: template === 'two-column' 
+          ? <TwoColumnHeader userData={userData} />
+          : <Header 
+              userData={userData}
+              nameFont={nameFont}
+              nameColor={nameColor}
+            />,
         type: "header",
         section: "header",
       });
@@ -103,7 +110,9 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
       if (config.showSummary && userData.summary) {
         newLines.push({
           id: `line-${newLines.length}`,
-          content: <Summary summary={userData.summary} />,
+          content: template === 'two-column'
+            ? <TwoColumnSummary summary={userData.summary} />
+            : <Summary summary={userData.summary} />,
           type: "summary",
           section: "summary",
         });
@@ -113,7 +122,9 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
       if (config.showExperience && userData.positions?.length > 0) {
         newLines.push({
           id: `line-${newLines.length}`,
-          content: <Experience positions={userData.positions} />,
+          content: template === 'two-column'
+            ? <TwoColumnExperience positions={userData.positions} />
+            : <Experience positions={userData.positions} />,
           type: "positions",
           section: "positions",
         });
@@ -123,7 +134,9 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
       if (config.showEducation && userData.educations?.length > 0) {
         newLines.push({
           id: `line-${newLines.length}`,
-          content: <Education educations={userData.educations} />,
+          content: template === 'two-column'
+            ? <TwoColumnEducation educations={userData.educations} />
+            : <Education educations={userData.educations} />,
           type: "education",
           section: "education",
         });
@@ -133,7 +146,9 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
       if (config.showSkills && userData.skills?.length > 0) {
         newLines.push({
           id: `line-${newLines.length}`,
-          content: <Skills skills={userData.skills} style={skillsStyle} />,
+          content: template === 'two-column'
+            ? <TwoColumnSkills skills={userData.skills} />
+            : <Skills skills={userData.skills} style={skillsStyle} />,
           type: "skills",
           section: "skills",
         });
@@ -143,7 +158,9 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
       if (config.showProjects && userData.projects?.length > 0) {
         newLines.push({
           id: `line-${newLines.length}`,
-          content: <Projects projects={userData.projects} />,
+          content: template === 'two-column'
+            ? <TwoColumnProjects projects={userData.projects} />
+            : <Projects projects={userData.projects} />,
           type: "projects",
           section: "projects",
         });
@@ -170,7 +187,7 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
       });
 
       return newLines;
-    }, [userData, config, nameColor, nameFont, skillsStyle]);
+    }, [userData, config, nameColor, nameFont, skillsStyle, template]);
 
     const handleDragEnd = useCallback(
       (event: DragEndEvent) => {
@@ -258,7 +275,11 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
       margin: "0 auto",
     };
 
-    const TemplateComponent = template === 'modern' ? ModernTemplate : DefaultTemplate;
+    const TemplateComponent = template === 'two-column' 
+      ? (props: any) => <TwoColumnTemplate {...props} userData={userData} config={config} />
+      : template === 'modern' 
+        ? ModernTemplate 
+        : DefaultTemplate;
 
     return (
       <div className="min-h-full resume-container w-[220mm]">

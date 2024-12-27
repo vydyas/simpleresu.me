@@ -1,0 +1,22 @@
+# Tests
+__tests__
+*.test.*
+*.spec.*
+
+# Development configs
+.eslintrc
+.prettierrc
+.editorconfig
+
+# Documentation
+README.md
+docs/
+*.md
+
+# Source control
+.git
+.gitignore
+
+# Development tools
+.vscode/
+.idea/ 

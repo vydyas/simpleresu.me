@@ -10,6 +10,7 @@ import { ResumeRef } from "@/components/resume";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { UserData } from '@/types/resume';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { TemplateDrawer } from "@/components/template-drawer";
 
 const Resume = dynamic(
   () => import("@/components/resume").then((mod) => mod.Resume),
@@ -52,7 +53,7 @@ export default function LandingPage() {
   });
 
   const resumeRef = useRef<ResumeRef>(null);
-  const [template, ] = useState(() => {
+  const [template, setTemplate] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("resumeTemplate") || "default";
     }
@@ -112,6 +113,15 @@ export default function LandingPage() {
         <PanelGroup direction="horizontal">
           <Panel defaultSize={60} minSize={50}>
             <div className="flex justify-center flex-col items-center">
+              <div className="fixed top-4 left-4 z-50">
+                <TemplateDrawer 
+                  activeTemplate={template} 
+                  onTemplateChange={(newTemplate) => {
+                    setTemplate(newTemplate);
+                    localStorage.setItem("resumeTemplate", newTemplate);
+                  }} 
+                />
+              </div>
               <Resume
                 key={JSON.stringify(userData)}
                 ref={resumeRef}

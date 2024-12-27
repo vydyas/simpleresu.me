@@ -354,3 +354,21 @@ input[type="color"]::-moz-color-swatch {
 .animate-attention {
   animation: attention-pulse 1s ease-in-out;
 }
+
+/* Add these styles if not already present */
+.sortable-ghost {
+  opacity: 0.5;
+  background: #f3f4f6;
+}
+
+.sortable-drag {
+  opacity: 0.5;
+}
+
+[data-dragging="true"] {
+  cursor: grabbing !important;
+}
+
+[data-dragging="false"] {
+  cursor: grab !important;
+}
