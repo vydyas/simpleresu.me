@@ -9,33 +9,17 @@ import React, {
   useImperativeHandle,
 } from "react";
 import { DragEndEvent } from "@dnd-kit/core";
-import {
-  arrayMove,
-} from "@dnd-kit/sortable";
+import { arrayMove } from "@dnd-kit/sortable";
 import "../app/custom-styles.css";
 import { Check } from "lucide-react";
 import FancyHeading from "./fancy-heading";
 import { useStyling } from "@/lib/styling-context";
 import { ResumeShimmer } from "./resume-shimmer";
-import { Header } from './resume-sections/header';
-import { Summary } from './resume-sections/summary';
-import { Experience } from './resume-sections/experience';
-import { Education } from './resume-sections/education';
-import { Skills } from './resume-sections/skills';
-import { Projects } from './resume-sections/projects';
+import { Header, Summary, Experience, Education, Skills, Projects, Certifications } from './resume-sections';
 import { DefaultTemplate } from './resume-templates/default';
 import { ModernTemplate } from './resume-templates/modern';
 // import Image from 'next/image';
 import { ResumeConfig, UserData } from '@/types/resume';
-import { Certifications } from './resume-sections/certifications';
-
-interface Education {
-  schoolName: string;
-  degree: string;
-  fieldOfStudy: string;
-  startDate: string;
-  endDate: string;
-}
 
 interface ResumeProps {
   userData: UserData & {
