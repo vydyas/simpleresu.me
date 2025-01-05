@@ -10,6 +10,7 @@ export interface ResumeConfig {
   showCertificates: boolean;
   showLanguages: boolean;
   showVolunteer: boolean;
+  showCertifications: boolean;
 }
 
 export type ConfigKey = keyof ResumeConfig;
@@ -30,4 +31,5 @@ export const defaultConfig: ResumeConfig = {
   showCertificates: true,
   showLanguages: true,
   showVolunteer: true,
+  showCertifications: true,
 };

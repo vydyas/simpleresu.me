@@ -25,17 +25,15 @@ export function Skills({ skills, style }: SkillsProps) {
           ))}
         </div>
       ) : (
-        <div className="flex gap-4 mt-2 text-sm text-gray-600 flex-wrap mb-2 ml-2">
-          <div className="flex items-center gap-1 text-base">
+        <div className="mt-2 text-sm text-gray-600 mb-2 ml-2">
+          <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
             {skills.map((skill, idx) => (
               <div
-                className="flex items-center gap-1 font-semibold"
                 key={idx}
+                className="inline-flex items-center font-semibold whitespace-nowrap"
               >
-                <span>
-                  {idx === 0 ? "" : "• "}
-                  {skill.name}
-                </span>
+                {idx !== 0 && <span className="mr-1">•</span>}
+                {skill.name}
               </div>
             ))}
           </div>

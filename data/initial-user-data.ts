@@ -1,8 +1,12 @@
+import { Certificate } from "crypto";
+
 export const initialUserData = {
   "firstName": "Siddhu",
   "lastName": "Vydyabhushana",
   "email": "vydyas@example.com",
   "headline": "Senior Full Stack Developer | Senior Front End Engineer",
+  // add certifications
+  "certifications": [],
   "summary": "<p>I have <strong>9 years</strong> of experience in software engineering, specialising in front-end technologies. I am a highly motivated and passionate developer with a strong focus on building quality products and solving complex problems.</p>",
   "positions": [
     {

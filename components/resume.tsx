@@ -27,6 +27,7 @@ import { DefaultTemplate } from './resume-templates/default';
 import { ModernTemplate } from './resume-templates/modern';
 // import Image from 'next/image';
 import { ResumeConfig, UserData } from '@/types/resume';
+import { Certifications } from './resume-sections/certifications';
 
 interface Education {
   schoolName: string;
@@ -37,7 +38,15 @@ interface Education {
 }
 
 interface ResumeProps {
-  userData: UserData;
+  userData: UserData & {
+    certifications?: Array<{
+      title: string;
+      organization: string;
+      completionDate: string;
+      description?: string;
+      credentialUrl?: string;
+    }>;
+  };
   config: ResumeConfig;
   onUserDataChange?: (newData: UserData) => void;
   githubId?: string;
@@ -146,6 +155,16 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
           content: <Projects projects={userData.projects} />,
           type: "projects",
           section: "projects",
+        });
+      }
+
+      // Add Certifications section
+      if (config.showCertifications) {
+        newLines.push({
+          id: `line-${newLines.length}`,
+          content: <Certifications certifications={userData.certifications} />,
+          type: "certifications",
+          section: "certifications",
         });
       }
 

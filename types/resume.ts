@@ -4,6 +4,7 @@ export interface ResumeConfig {
   showEducation: boolean;
   showSkills: boolean;
   showProjects: boolean;
+  showCertifications: boolean;
   // Add other configuration options as needed
 }
 
@@ -38,6 +39,13 @@ export interface UserData {
     title: string;
     link: string;
     description: string;
+  }>;
+  certifications?: Array<{
+    title: string;
+    organization: string;
+    completionDate: string;
+    description?: string;
+    credentialUrl?: string;
   }>;
   customSections?: Array<{
     id: string;

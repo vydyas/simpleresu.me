@@ -19,12 +19,21 @@ import debounce from "lodash/debounce";
 import { FloatingControls } from './floating-controls';
 import { OnlineUsers } from './online-users';
 import { ResumeScore } from './resume-score';
+import { UserData as UserDataType } from "@/types/resume";
 
 interface CustomSection {
   id: string;
   title: string;
   content: string;
   isVisible: boolean;
+}
+
+interface Certification {
+  title: string;
+  organization: string;
+  completionDate: string;
+  description?: string;
+  credentialUrl?: string;
 }
 
 interface UserData {
@@ -60,6 +69,7 @@ interface UserData {
     description: string;
   }>;
   customSections?: CustomSection[];
+  certifications?: UserDataType['certifications'];
 }
 
 interface RightSidebarProps {
@@ -365,6 +375,32 @@ export function RightSidebar({
   };
 
   const resumeScore = calculateResumeScore();
+
+  // Add handler functions for certifications
+  const handleCertificationChange = (
+    index: number,
+    field: keyof Certification,
+    value: string
+  ) => {
+    const updatedCertifications = userData.certifications ? [...userData.certifications] : [];
+    updatedCertifications[index] = {
+      ...updatedCertifications[index],
+      [field]: value,
+    };
+    onUserDataChange({
+      ...userData,
+      certifications: updatedCertifications,
+    });
+  };
+
+  const handleDeleteCertification = (index: number) => {
+    if (!userData.certifications) return;
+    const updatedCertifications = userData.certifications.filter((_, i) => i !== index);
+    onUserDataChange({
+      ...userData,
+      certifications: updatedCertifications,
+    });
+  };
 
   return (
     <div className="bg-background shadow-md h-screen flex flex-col right-sidebar">
@@ -1130,6 +1166,144 @@ export function RightSidebar({
                 </AccordionContent>
               </AccordionItem>
             ))}
+            <AccordionItem
+              value="certifications"
+              className="border rounded-lg"
+              key="certifications"
+            >
+              <div className="flex items-center justify-between bg-muted px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
+                <AccordionTrigger className="text-sm font-bold hover:no-underline">
+                  Certifications
+                </AccordionTrigger>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (isValidConfigKey("showCertifications")) {
+                      onConfigChange("showCertifications", !config.showCertifications);
+                    }
+                  }}
+                  className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  aria-label={
+                    config.showCertifications
+                      ? "Hide certifications section"
+                      : "Show certifications section"
+                  }
+                >
+                  {config.showCertifications ? (
+                    <Eye className="w-4 h-4" />
+                  ) : (
+                    <EyeOff className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+              <AccordionContent className="p-4 text-lg">
+                <Accordion
+                  type="multiple"
+                  className="w-full space-y-2"
+                  key="certifications-accordion"
+                >
+                  {userData.certifications?.map((cert, index) => (
+                    <Card key={index} className="mb-4">
+                      <CardContent className="p-4">
+                        <div className="space-y-2">
+                          <Input
+                            value={cert.title}
+                            onChange={(e) =>
+                              handleCertificationChange(
+                                index,
+                                "title",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Certification Title"
+                            className="mb-2"
+                          />
+                          <Input
+                            value={cert.organization}
+                            onChange={(e) =>
+                              handleCertificationChange(
+                                index,
+                                "organization",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Issuing Organization"
+                            className="mb-2"
+                          />
+                          <Input
+                            value={cert.completionDate}
+                            onChange={(e) =>
+                              handleCertificationChange(
+                                index,
+                                "completionDate",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Completion Date (e.g., Jan 2021)"
+                            className="mb-2"
+                          />
+                          <Input
+                            value={cert.credentialUrl}
+                            onChange={(e) =>
+                              handleCertificationChange(
+                                index,
+                                "credentialUrl",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Credential URL (optional)"
+                            className="mb-2"
+                          />
+                          <div>
+                            <Label>Description (optional)</Label>
+                            <RichTextEditor
+                              content={cert.description || ''}
+                              onChange={(content) =>
+                                handleCertificationChange(
+                                  index,
+                                  "description",
+                                  content
+                                )
+                              }
+                            />
+                          </div>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteCertification(index)}
+                            className="mt-2"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Certification
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Accordion>
+                <Button
+                  onClick={() =>
+                    onUserDataChange({
+                      ...userData,
+                      certifications: [
+                        ...(userData.certifications || []),
+                        {
+                          title: "",
+                          organization: "",
+                          completionDate: "",
+                          description: "",
+                          credentialUrl: "",
+                        },
+                      ],
+                    })
+                  }
+                  className="w-full mt-2"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Certification
+                </Button>
+              </AccordionContent>
+            </AccordionItem>
           </Accordion>
 
           {/* Scroll to Top Button */}
