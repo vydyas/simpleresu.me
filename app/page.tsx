@@ -10,7 +10,6 @@ import { ResumeRef } from "@/components/resume";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { UserData } from '@/types/resume';
 import { ErrorBoundary } from '@/components/error-boundary';
-import { initGA } from '@/lib/analytics';
 
 const Resume = dynamic(
   () => import("@/components/resume").then((mod) => mod.Resume),
@@ -87,11 +86,6 @@ export default function LandingPage() {
       localStorage.setItem("resumeTemplate", template);
     }
   }, [template]);
-
-  useEffect(() => {
-    // Initialize GA when component mounts
-    initGA();
-  }, []);
 
   const handleConfigChange = (key: unknown, value: boolean) => {
     const stringKey = String(key);
