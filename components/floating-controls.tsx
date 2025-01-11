@@ -11,6 +11,23 @@ interface FloatingControlsProps {
   onZoomChange: (zoom: number) => void;
 }
 
+interface GoogleAnalytics {
+  gtag: (
+    command: 'event',
+    action: string,
+    params: {
+      event_category: string;
+      event_label: string;
+    }
+  ) => void;
+}
+
+declare global {
+  interface Window {
+    gtag?: GoogleAnalytics['gtag'];
+  }
+}
+
 export function FloatingControls({
   zoom,
   onZoomChange,
@@ -69,11 +86,27 @@ export function FloatingControls({
 
   const handlePrint = async () => {
     try {
+      // Track print event with proper typing
+      window.gtag?.('event', 'print_resume', {
+        event_category: 'Resume',
+        event_label: 'Print Resume'
+      });
+
       await window.print();
-      fireConfetti(); // Fire confetti after successful print
+      fireConfetti();
     } catch (error) {
       console.error('Print failed:', error);
     }
+  };
+
+  const handleSettingsClick = () => {
+    // Track settings open event with proper typing
+    window.gtag?.('event', 'open_settings', {
+      event_category: 'Settings',
+      event_label: 'Open Settings'
+    });
+    
+    setIsSettingsOpen(!isSettingsOpen);
   };
 
   return (
@@ -135,7 +168,7 @@ export function FloatingControls({
             ref={settingsButtonRef}
             variant="ghost"
             size="icon"
-            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+            onClick={handleSettingsClick}
           >
             <Settings className="h-4 w-4" />
           </Button>

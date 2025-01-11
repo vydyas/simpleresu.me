@@ -2,7 +2,7 @@ import { Inter } from 'next/font/google';
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { StylingProvider } from "@/lib/styling-context";
-import { Analytics } from "@vercel/analytics/react";
+import Script from 'next/script';
 
 // Initialize the Inter font
 const inter = Inter({ subsets: ['latin'] });
@@ -30,7 +30,20 @@ export default function RootLayout({
         <meta name="twitter:title" content="Build Job-Winning Resumes for the Tech Industry | SimpleResu.me Resume Builder" />
         <meta name="twitter:description" content="Create professional resumes tailored for the tech industry, including FAANG and MAANG companies." />
         <meta name="twitter:image" content="https://github.com/user-attachments/assets/95d817d8-6d61-41a3-8298-7d57fddec1cd" />
-        {/* Add any other necessary meta tags */}
+        
+        {/* Google Analytics */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=G-XY4H2C61EY`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-XY4H2C61EY');
+          `}
+        </Script>
       </head>
       <body className={inter.className}>
         <ThemeProvider>
@@ -38,7 +51,6 @@ export default function RootLayout({
             {children}
           </StylingProvider>
         </ThemeProvider>
-        <Analytics />
       </body>
     </html>
   );
