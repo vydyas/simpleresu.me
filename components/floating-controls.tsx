@@ -5,27 +5,11 @@ import { Settings, Printer, Minus, Plus } from 'lucide-react';
 import { GlobalSettings } from './global-settings';
 import { RippleButton } from './ui/ripple-button';
 import { fireConfetti } from '@/lib/confetti';
+import { trackEvents } from '@/lib/analytics';
 
 interface FloatingControlsProps {
   zoom: number;
   onZoomChange: (zoom: number) => void;
-}
-
-interface GoogleAnalytics {
-  gtag: (
-    command: 'event',
-    action: string,
-    params: {
-      event_category: string;
-      event_label: string;
-    }
-  ) => void;
-}
-
-declare global {
-  interface Window {
-    gtag?: GoogleAnalytics['gtag'];
-  }
 }
 
 export function FloatingControls({
@@ -86,12 +70,7 @@ export function FloatingControls({
 
   const handlePrint = async () => {
     try {
-      // Track print event with proper typing
-      window.gtag?.('event', 'print_resume', {
-        event_category: 'Resume',
-        event_label: 'Print Resume'
-      });
-
+      trackEvents.resumePrinted();
       await window.print();
       fireConfetti();
     } catch (error) {
@@ -100,12 +79,7 @@ export function FloatingControls({
   };
 
   const handleSettingsClick = () => {
-    // Track settings open event with proper typing
-    window.gtag?.('event', 'open_settings', {
-      event_category: 'Settings',
-      event_label: 'Open Settings'
-    });
-    
+    trackEvents.settingsOpened();
     setIsSettingsOpen(!isSettingsOpen);
   };
 
