@@ -87,7 +87,7 @@ export function FloatingControls({
   };
 
   return (
-    <div className="floating-controls">
+    <nav className="floating-controls" aria-label="Resume controls">
       <div className={`
         bg-white dark:bg-gray-900
         backdrop-blur-xl
@@ -100,17 +100,18 @@ export function FloatingControls({
         transition-all duration-300
       `}>
         {/* Zoom Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" role="group" aria-label="Zoom controls">
           <Button
             onClick={handleZoomOut}
             disabled={zoom <= 50}
             size="icon"
             variant="outline"
             className="w-8 h-8"
+            aria-label={`Zoom out (current zoom: ${zoom}%)`}
           >
-            <Minus className="h-4 w-4" />
+            <Minus className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <span className="text-sm text-gray-500 min-w-[48px] text-center">
+          <span className="text-sm text-gray-500 min-w-[48px] text-center" aria-live="polite">
             {zoom}%
           </span>
           <Button
@@ -119,8 +120,9 @@ export function FloatingControls({
             size="icon"
             variant="outline"
             className="w-8 h-8"
+            aria-label={`Zoom in (current zoom: ${zoom}%)`}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
 
@@ -132,22 +134,25 @@ export function FloatingControls({
           size="icon"
           onClick={handlePrint}
           className="relative overflow-hidden w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800"
-          title="Print Resume"
+          title="Print Resume (opens print dialog)"
         >
-          <Printer className="h-4 w-4" />
+          <Printer className="h-4 w-4" aria-hidden="true" />
         </RippleButton>
 
         <Separator orientation="vertical" className="h-6" />
 
-        {/* Settings */}
+        {/* Settings Button */}
         <div className="relative">
           <Button
             ref={settingsButtonRef}
             variant="ghost"
             size="icon"
             onClick={handleSettingsClick}
+            aria-label="Open Settings Menu"
+            aria-expanded={isSettingsOpen}
+            aria-haspopup="dialog"
           >
-            <Settings className="h-4 w-4" />
+            <Settings className="h-4 w-4" aria-hidden="true" />
           </Button>
 
           {isSettingsOpen && (
@@ -155,6 +160,9 @@ export function FloatingControls({
               ref={settingsDropdownRef}
               className={`absolute z-50 right-0 bg-white dark:bg-gray-900 rounded-lg shadow-xl border
                 ${dropdownPosition === 'bottom' ? 'mt-2 top-full' : 'mb-2 bottom-full'}`}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Settings Panel"
             >
               <GlobalSettings
                 onClose={() => setIsSettingsOpen(false)}
@@ -164,6 +172,6 @@ export function FloatingControls({
           )}
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

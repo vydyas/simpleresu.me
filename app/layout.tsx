@@ -22,7 +22,7 @@ export default function RootLayout({
         <meta name="keywords" content="resume builder, tech industry resumes, FAANG resumes, MAANG resumes, professional resume, job application, career tools, resume templates, online resume, free resume builder" />
         <meta 
           name="viewport" 
-          content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
+          content="width=device-width, initial-scale=1, viewport-fit=cover, minimum-scale=1, maximum-scale=5"
         />
         <meta name="twitter:card" content="summary_large_image" />
 
