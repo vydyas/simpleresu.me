@@ -20,7 +20,10 @@ export default function RootLayout({
         <title>Build Job-Winning Resumes for the Tech Industry | SimpleResu.me Resume Builder</title>
         <meta name="description" content="Create professional resumes tailored for the tech industry, including FAANG and MAANG companies." />
         <meta name="keywords" content="resume builder, tech industry resumes, FAANG resumes, MAANG resumes, professional resume, job application, career tools, resume templates, online resume, free resume builder" />
-        <meta name="viewport" content="width=1280, initial-scale=0.3" />
+        <meta 
+          name="viewport" 
+          content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
+        />
         <meta name="twitter:card" content="summary_large_image" />
 
         <meta property="og:title" content="Build Job-Winning Resumes for the Tech Industry | SimpleResu.me Resume Builder" />

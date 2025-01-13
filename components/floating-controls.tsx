@@ -1,7 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Settings, Printer, Minus, Plus } from 'lucide-react';
+import Settings from 'lucide-react/dist/esm/icons/settings';
+import Printer from 'lucide-react/dist/esm/icons/printer';
+import Minus from 'lucide-react/dist/esm/icons/minus';
+import Plus from 'lucide-react/dist/esm/icons/plus';
 import { GlobalSettings } from './global-settings';
 import { RippleButton } from './ui/ripple-button';
 import { fireConfetti } from '@/lib/confetti';

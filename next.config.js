@@ -11,6 +11,30 @@ const nextConfig = {
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
+  },
+  experimental: {
+    optimizeCss: {
+      critters: {
+        ssrMode: 'strict'
+      }
+    },
+    optimizePackageImports: [
+      '@radix-ui/react-accordion',
+      '@radix-ui/react-dialog',
+      'lucide-react',
+      '@tiptap/react',
+      '@tiptap/starter-kit',
+      '@dnd-kit/core',
+      '@dnd-kit/sortable'
+    ],
+  },
+  webpack: (config, { dev, isServer }) => {
+    if (!dev && !isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+      };
+    }
+    return config;
   }
 }
 
