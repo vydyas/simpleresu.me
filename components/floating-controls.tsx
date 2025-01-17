@@ -2,13 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import Settings from 'lucide-react/dist/esm/icons/settings';
-import Printer from 'lucide-react/dist/esm/icons/printer';
 import Minus from 'lucide-react/dist/esm/icons/minus';
 import Plus from 'lucide-react/dist/esm/icons/plus';
 import { GlobalSettings } from './global-settings';
 import { RippleButton } from './ui/ripple-button';
 import { fireConfetti } from '@/lib/confetti';
 import { trackEvents } from '@/lib/analytics';
+import Download from 'lucide-react/dist/esm/icons/download';
 
 interface FloatingControlsProps {
   zoom: number;
@@ -136,7 +136,7 @@ export function FloatingControls({
           className="relative overflow-hidden w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800"
           title="Print Resume (opens print dialog)"
         >
-          <Printer className="h-4 w-4" aria-hidden="true" />
+          <Download className="h-4 w-4" aria-hidden="true" />
         </RippleButton>
 
         <Separator orientation="vertical" className="h-6" />
