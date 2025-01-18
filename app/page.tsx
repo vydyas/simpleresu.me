@@ -31,7 +31,7 @@ export default function LandingPage() {
   const [zoom, setZoom] = useState(() => {
     if (typeof window !== "undefined") {
       const savedZoom = localStorage.getItem("resumeZoom");
-      return savedZoom ? Math.min(parseInt(savedZoom), 110) : 80;
+      return savedZoom ? Math.min(parseInt(savedZoom), 110) : 100;
     }
     return 100;
   });
