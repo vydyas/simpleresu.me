@@ -3,7 +3,6 @@ import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { DraggableLine } from "../draggable-line";
 import { LineItem } from "@/types/resume";
-import { Watermark } from "../watermark";
 
 interface DefaultTemplateProps {
   lines: LineItem[];
@@ -49,7 +48,6 @@ export function DefaultTemplate({
               </SortableContext>
             </DndContext>
           </div>
-          <Watermark />
         </Card>
       </div>
     </div>
