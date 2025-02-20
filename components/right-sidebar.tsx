@@ -20,6 +20,7 @@ import { FloatingControls } from './floating-controls';
 import { OnlineUsers } from './online-users';
 import { ResumeScore } from './resume-score';
 import { UserData as UserDataType } from "@/types/resume";
+import Link from "next/link";
 
 interface CustomSection {
   id: string;
@@ -410,7 +411,17 @@ export function RightSidebar({
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent whitespace-nowrap transition-transform duration-500 ease-out group-hover:scale-105">
               simpleresu.me
             </h1>
-            <OnlineUsers />
+            <div className="flex items-center gap-4">
+              <Link 
+                href="/job-tracker"
+                className="relative px-4 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 group/link hover:text-primary dark:hover:text-primary transition-colors duration-200"
+              >
+                <span className="relative z-10">Job Tracker</span>
+                <span className="absolute inset-0 bg-gray-100 dark:bg-gray-800 rounded-full scale-x-0 group-hover/link:scale-x-100 transition-transform origin-left duration-200 ease-out" />
+                <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-primary scale-x-0 group-hover/link:scale-x-100 transition-transform origin-left duration-200 ease-out" />
+              </Link>
+              <OnlineUsers />
+            </div>
           </div>
         </div>
       </div>
