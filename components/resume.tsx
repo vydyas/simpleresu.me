@@ -20,6 +20,7 @@ import { DefaultTemplate } from './resume-templates/default';
 import { ModernTemplate } from './resume-templates/modern';
 // import Image from 'next/image';
 import { ResumeConfig, UserData } from '@/types/resume';
+import { ResumeConfig as ResumeConfigLib } from "@/lib/resume-config";
 
 interface ResumeProps {
   userData: UserData & {
@@ -36,6 +37,7 @@ interface ResumeProps {
   githubId?: string;
   template?: string;
   zoom: number;
+  scale?: number;
 }
 
 interface LineItem {
@@ -57,6 +59,7 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
       githubId,
       template = "default",
       zoom,
+      scale = 1,
     }: ResumeProps,
     ref: React.ForwardedRef<ResumeRef>
   ) {
@@ -66,7 +69,11 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
     const [showSaveIndicator, setShowSaveIndicator] = useState(false);
     const [isFirstLoad, setIsFirstLoad] = useState(true);
 
-    const { nameFont, nameColor, borderColor, skillsStyle, resumeBackgroundColor } = useStyling();
+    const { nameFont, nameColor, borderColor, skillsStyle, resumeBackgroundColor, fontSize } = useStyling();
+
+    // A4 dimensions in pixels (assuming 96 DPI)
+    const A4_WIDTH_PX = 794;  // 210mm
+    const A4_HEIGHT_PX = 1123; // 297mm
 
     useImperativeHandle(ref, () => ({
       downloadPDF: async () => {
@@ -264,84 +271,67 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
     const TemplateComponent = template === 'modern' ? ModernTemplate : DefaultTemplate;
 
     return (
-      <div className="min-h-full resume-container w-[220mm]">
-        {/* <div className="flex justify-center gap-2 my-4">
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            <Image
-              src="https://www.google.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Google"
-              className="w-4 h-4"
-            />
-            Google
-          </div>
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-gray-800">
-            <Image
-              src="https://www.microsoft.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Microsoft"
-              className="w-4 h-4"
-            />
-            Microsoft
-          </div>
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-900">
-            <Image
-              src="https://www.facebook.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Meta"
-              className="w-4 h-4"
-            />
-            Meta
-          </div>
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-900">
-            <Image
-              src="https://www.netflix.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Netflix"
-              className="w-4 h-4"
-            />
-            Netflix
-          </div>
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-yelow-100 text-gray-900">
-            <Image
-              src="https://www.apple.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Apple"
-              className="w-4 h-4"
-            />
-            Apple
-          </div>
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-gray-900">
-            <Image
-              src="https://www.salesforce.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Salesforce"
-              className="w-4 h-4"
-            />
-            Salesforce
-          </div>
-        </div> */}
-        <TemplateComponent
-          lines={lines}
-          onDragEnd={handleDragEnd}
-          resumeRef={resumeContainerRef}
-          wrapperClass={wrapperClass}
-          borderColor={borderColor}
-          zoomStyle={zoomStyle}
-          resumeBackgroundColor={resumeBackgroundColor}
-        />
+      <div 
+        className="relative bg-white shadow-lg mx-auto print:shadow-none"
+        style={{
+          width: `${A4_WIDTH_PX}px`,
+          minHeight: `${A4_HEIGHT_PX}px`,
+          transform: `scale(${scale})`,
+          transformOrigin: 'top center',
+          fontSize: `${fontSize}px`,
+          // Enable page breaks
+          pageBreakAfter: 'always',
+          pageBreakInside: 'avoid',
+        }}
+      >
+        {/* Page Numbers */}
+        <div className="fixed bottom-4 right-4 text-gray-400 text-sm print:block hidden">
+          <span className="page"></span>
+        </div>
+
+        {/* Resume Content with page break considerations */}
+        <div className="p-12 print:p-0">
+          <TemplateComponent
+            lines={lines}
+            onDragEnd={handleDragEnd}
+            resumeRef={resumeContainerRef}
+            wrapperClass={wrapperClass}
+            borderColor={borderColor}
+            zoomStyle={zoomStyle}
+            resumeBackgroundColor={resumeBackgroundColor}
+          />
+        </div>
+
         {showSaveIndicator && (
           <div className="fixed top-0 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1 rounded-md transition-opacity shadow-sm z-50">
             <Check className="w-4 h-4" />
             <span className="text-sm">Saved</span>
           </div>
         )}
+
+        <style jsx global>{`
+          @media print {
+            @page {
+              size: A4;
+              margin: 0;
+            }
+
+            /* Add page numbers */
+            .page::after {
+              content: counter(page);
+            }
+
+            /* Handle page breaks for sections */
+            section {
+              break-inside: avoid;
+            }
+
+            /* Force page break before specific sections if needed */
+            .force-page-break {
+              break-before: page;
+            }
+          }
+        `}</style>
       </div>
     );
   }
