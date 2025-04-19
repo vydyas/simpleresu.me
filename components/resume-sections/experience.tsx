@@ -19,16 +19,16 @@ export function Experience({ positions }: ExperienceProps) {
   return (
     <div>
       <FancyHeading>Experience</FancyHeading>
-      <div className="space-y-2 ml-2">
+      <div className="space-y-4 ml-2">
         {positions.map((position, index) => (
           <div key={index} className="space-y-1">
-            <div className="flex justify-between items-center">
-              <div className="flex">
-                        <div className="font-semibold">{position.title}</div>
-                        <span>&nbsp;at&nbsp;</span>
-                <div style={{ color: companyColor }}>{position.company}</div>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-y-1">
+              <div className="flex flex-wrap items-center gap-x-1">
+                <div className="font-semibold">{position.title}</div>
+                <span className="whitespace-nowrap">at</span>
+                <div className="whitespace-nowrap" style={{ color: companyColor }}>{position.company}</div>
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 whitespace-nowrap">
                 {position.startDate} - {position.endDate}
               </div>
             </div>

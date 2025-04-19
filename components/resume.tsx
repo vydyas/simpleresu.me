@@ -252,19 +252,10 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
       return <ResumeShimmer />;
     }
 
-    const wrapperClass =
-      "mx-auto bg-white overflow-hidden shadow-lg mt-8 mb-8";
-    const zoomStyle = {
-      transform: `scale(${zoom / 100})`,
-      transformOrigin: "top center",
-      width: zoom > 100 ? `${(100 * 100) / zoom}%` : "100%",
-      margin: "0 auto",
-    };
-
     const TemplateComponent = template === 'modern' ? ModernTemplate : DefaultTemplate;
 
     return (
-      <div className="min-h-full resume-container w-[220mm]">
+      <div className="min-h-full resume-container w-full px-4 md:px-0 md:w-[220mm]">
         {/* <div className="flex justify-center gap-2 my-4">
           <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
             <Image
@@ -331,13 +322,18 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
           lines={lines}
           onDragEnd={handleDragEnd}
           resumeRef={resumeContainerRef}
-          wrapperClass={wrapperClass}
+          wrapperClass={`mx-auto bg-white overflow-hidden shadow-lg my-4 md:my-8 max-w-full md:max-w-[210mm]`}
           borderColor={borderColor}
-          zoomStyle={zoomStyle}
+          zoomStyle={{
+            transform: `scale(${zoom / 100})`,
+            transformOrigin: "top center",
+            width: zoom > 100 ? `${(100 * 100) / zoom}%` : "100%",
+            margin: "0 auto",
+          }}
           resumeBackgroundColor={resumeBackgroundColor}
         />
         {showSaveIndicator && (
-          <div className="fixed top-0 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1 rounded-md transition-opacity shadow-sm z-50">
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1 rounded-md transition-opacity shadow-sm z-50">
             <Check className="w-4 h-4" />
             <span className="text-sm">Saved</span>
           </div>

@@ -24,7 +24,7 @@ export function ModernTemplate({
   resumeBackgroundColor,
 }: ModernTemplateProps) {
   return (
-    <div className="resume-container">
+    <div className="resume-container w-full">
       <div className="resume-content" style={zoomStyle}>
         <Card
           ref={resumeRef}
@@ -34,12 +34,12 @@ export function ModernTemplate({
             backgroundColor: resumeBackgroundColor || '#ffffff'
           }}
         >
-          <div className="grid grid-cols-[2rem_1fr] h-full">
+          <div className="grid grid-cols-[1rem_1fr] sm:grid-cols-[1.5rem_1fr] md:grid-cols-[2rem_1fr] h-full">
             {/* Left color bar */}
             <div className="h-full" />
             
             {/* Main content */}
-            <div className="py-6 pr-6">
+            <div className="py-3 sm:py-4 md:py-6 px-2 sm:px-4 md:px-6">
               <DndContext onDragEnd={onDragEnd}>
                 <SortableContext
                   items={lines.map((item) => item.id)}
@@ -48,8 +48,9 @@ export function ModernTemplate({
                   {lines.map((line) => (
                     <DraggableLine key={line.id} id={line.id}>
                       <div className={`
-                        ${line.type === 'header' ? 'col-span-2 text-center mb-6' : ''}
-                        ${line.type === 'skills' ? 'mt-4' : ''}
+                        text-sm sm:text-base
+                        ${line.type === 'header' ? 'col-span-2 text-center mb-4 sm:mb-6' : ''}
+                        ${line.type === 'skills' ? 'mt-2 sm:mt-4' : ''}
                       `}>
                         {line.content}
                       </div>

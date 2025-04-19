@@ -108,25 +108,21 @@ export default function LandingPage() {
 
   return (
     <ErrorBoundary>
-      <div className="flex bg-white h-screen">
-        <PanelGroup direction="horizontal">
-          <Panel defaultSize={60} minSize={50}>
-            <div className="flex justify-center flex-col items-center">
-              <Resume
-                key={JSON.stringify(userData)}
-                ref={resumeRef}
-                template={template}
-                githubId={githubId}
-                config={config}
-                userData={userData}
-                zoom={zoom}
-              />
-            </div>
-          </Panel>
-          <PanelResizeHandle className="w-2 hover:bg-gray-300 transition-colors resize-handle">
-            <div className="w-1 h-full mx-auto bg-gray-200" />
-          </PanelResizeHandle>
-          <Panel defaultSize={40} minSize={30}>
+      <div className="flex flex-col lg:flex-row bg-white min-h-screen">
+        {/* Mobile View */}
+        <div className="w-full lg:hidden">
+          <div className="flex flex-col items-center">
+            <Resume
+              key={JSON.stringify(userData)}
+              ref={resumeRef}
+              template={template}
+              githubId={githubId}
+              config={config}
+              userData={userData}
+              zoom={zoom}
+            />
+          </div>
+          <div className="w-full">
             <ClientRightSidebar
               config={config}
               onConfigChange={handleConfigChange}
@@ -135,8 +131,40 @@ export default function LandingPage() {
               zoom={zoom}
               onZoomChange={setZoom}
             />
-          </Panel>
-        </PanelGroup>
+          </div>
+        </div>
+        
+        {/* Desktop View */}
+        <div className="hidden lg:flex w-full">
+          <PanelGroup direction="horizontal">
+            <Panel defaultSize={60} minSize={50}>
+              <div className="flex justify-center flex-col items-center">
+                <Resume
+                  key={JSON.stringify(userData)}
+                  ref={resumeRef}
+                  template={template}
+                  githubId={githubId}
+                  config={config}
+                  userData={userData}
+                  zoom={zoom}
+                />
+              </div>
+            </Panel>
+            <PanelResizeHandle className="w-2 hover:bg-gray-300 transition-colors resize-handle">
+              <div className="w-1 h-full mx-auto bg-gray-200" />
+            </PanelResizeHandle>
+            <Panel defaultSize={40} minSize={30}>
+              <ClientRightSidebar
+                config={config}
+                onConfigChange={handleConfigChange}
+                userData={userData}
+                onUserDataChange={handleUserDataChange}
+                zoom={zoom}
+                onZoomChange={setZoom}
+              />
+            </Panel>
+          </PanelGroup>
+        </div>
       </div>
     </ErrorBoundary>
   );

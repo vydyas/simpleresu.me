@@ -16,21 +16,25 @@ export function Education({ educations }: EducationProps) {
   return (
     <div>
       <FancyHeading>Education</FancyHeading>
-      {educations.map((education, idx) => (
-        <div key={idx} className="ml-2 mb-4 last:mb-0">
-          <div className="flex justify-between">
-            <h3 className="font-semibold text-base">
-              {education.degree} in {education.fieldOfStudy}
-            </h3>
-            <p className="text-xs text-gray-600">
-              {education.startDate} - {education.endDate}
-            </p>
+      <div className="space-y-4 ml-2">
+        {educations.map((education, idx) => (
+          <div key={idx} className="space-y-1">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-y-1">
+              <div className="space-y-1 sm:space-y-0">
+                <h3 className="font-semibold text-base">
+                  {education.degree} in {education.fieldOfStudy}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {education.schoolName}
+                </p>
+              </div>
+              <div className="text-sm text-gray-500 whitespace-nowrap">
+                {education.startDate} - {education.endDate}
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-gray-600">
-            {education.schoolName}
-          </p>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 } 
