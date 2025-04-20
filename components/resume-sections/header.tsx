@@ -66,7 +66,7 @@ export function Header({ userData, nameColor }: HeaderProps) {
       resizeObserver.disconnect();
       window.removeEventListener('resize', handleResize);
     };
-  }, [isMobile, isVerySmallScreen]);
+  }, [isMobile, isVerySmallScreen, updateScale]);
 
   return (
     <div className="text-center px-0 max-w-4xl mx-auto">

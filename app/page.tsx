@@ -1,10 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import dynamic from "next/dynamic";
-import { ResumeShimmer } from "@/components/resume-shimmer";
 import { initialUserData } from "@/data/initial-user-data";
-import { ClientRightSidebar } from "@/components/client-right-sidebar";
 import { defaultConfig, ResumeConfig, useResumeConfig } from "@/lib/resume-config";
 import { ResumeRef } from "@/components/resume";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -13,14 +10,6 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { MobileSidebar } from '@/components/mobile-sidebar';
 import { RightSidebar } from "@/components/right-sidebar";
 import { Resume as ResumeComponent } from "@/components/resume";
-
-const Resume = dynamic(
-  () => import("@/components/resume").then((mod) => mod.Resume),
-  {
-    ssr: false,
-    loading: () => <ResumeShimmer />
-  }
-);
 
 type ConfigKey = keyof ResumeConfig;
 
