@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 export interface ResumeConfig {
   showPhoto: boolean;
   showSummary: boolean;
@@ -5,20 +7,10 @@ export interface ResumeConfig {
   showEducation: boolean;
   showSkills: boolean;
   showProjects: boolean;
-  showRepositories: boolean;
-  showAwards: boolean;
-  showCertificates: boolean;
-  showLanguages: boolean;
-  showVolunteer: boolean;
   showCertifications: boolean;
 }
 
-export type ConfigKey = keyof ResumeConfig;
-
-export function isValidConfigKey(key: string): key is ConfigKey {
-  return key in defaultConfig;
-}
-
+// Default configuration with all sections visible
 export const defaultConfig: ResumeConfig = {
   showPhoto: true,
   showSummary: true,
@@ -26,10 +18,44 @@ export const defaultConfig: ResumeConfig = {
   showEducation: true,
   showSkills: true,
   showProjects: true,
-  showRepositories: true,
-  showAwards: true,
-  showCertificates: true,
-  showLanguages: true,
-  showVolunteer: true,
   showCertifications: true,
+};
+
+// Type guard to check if a key is valid
+export const isValidConfigKey = (key: string): key is keyof ResumeConfig => {
+  return key in defaultConfig;
+};
+
+// Hook to manage resume configuration with SSR support
+export const useResumeConfig = () => {
+  // Initialize with default state
+  const [config, setConfig] = useState<ResumeConfig>(defaultConfig);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Load saved configuration from localStorage
+    const savedConfig = localStorage.getItem('resumeConfig');
+    if (savedConfig) {
+      try {
+        const parsedConfig = JSON.parse(savedConfig);
+        setConfig(parsedConfig);
+      } catch (error) {
+        console.error('Failed to parse saved config:', error);
+      }
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Update configuration
+  const updateConfig = (key: keyof ResumeConfig, value: boolean) => {
+    const newConfig = { ...config, [key]: value };
+    setConfig(newConfig);
+    localStorage.setItem('resumeConfig', JSON.stringify(newConfig));
+  };
+
+  return {
+    config,
+    updateConfig,
+    isLoaded,
+  };
 };

@@ -8,12 +8,8 @@ interface ResumeScoreProps {
 }
 
 export function ResumeScore({ score }: ResumeScoreProps) {
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setProgress(Math.min(score, 100)), 500);
-    return () => clearTimeout(timer);
-  }, [score]);
+  // Cap the score at 100%
+  const displayScore = Math.min(score, 100);
 
   const getScoreColor = (value: number) => {
     if (value < 50) return "bg-red-500";
@@ -28,23 +24,21 @@ export function ResumeScore({ score }: ResumeScoreProps) {
           <span className="text-sm font-medium">Resume Score</span>
           <span 
             className={`text-sm font-bold ${
-              progress < 50 ? 'text-red-500' : 
-              progress < 80 ? 'text-orange-500' : 
+              displayScore < 50 ? 'text-red-500' : 
+              displayScore < 80 ? 'text-orange-500' : 
               'text-green-500'
             }`}
           >
-            {progress}%
+            {displayScore}%
           </span>
         </div>
         <Progress 
-          value={progress} 
+          value={displayScore} 
           className="h-2 transition-all duration-500"
-          indicatorColor={getScoreColor(progress)}
+          indicatorColor={getScoreColor(displayScore)}
         />
         <p className="text-xs text-gray-500">
-          {progress < 50 ? 'Your resume needs improvement' :
-           progress < 80 ? 'Your resume is getting better' :
-           'Your resume looks great!'}
+          {displayScore === 100 ? 'Your resume looks great!' : 'Keep adding relevant information to improve your score.'}
         </p>
       </div>
     </div>

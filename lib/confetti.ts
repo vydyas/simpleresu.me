@@ -1,25 +1,42 @@
 import confetti from 'canvas-confetti';
 
-// Create audio instance outside the function so it's only created once
-const audio = new Audio('https://confettitherapy.com/assets/sounds/pop.mp3');
-audio.volume = 0.3;
-// Preload the audio
-audio.load();
+// Lazy initialize audio only when needed and only on client side
+let audio: HTMLAudioElement | null = null;
+
+const initAudio = (): HTMLAudioElement | null => {
+  if (typeof window === 'undefined') return null;
+  
+  if (!audio) {
+    const newAudio = new Audio('https://confettitherapy.com/assets/sounds/pop.mp3');
+    newAudio.volume = 0.3;
+    newAudio.load();
+    audio = newAudio;
+  }
+  return audio;
+};
 
 export const playConfettiWithSound = async () => {
-  try {
-    // Reset audio to start
-    audio.currentTime = 0;
-    // Use await to ensure the play promise is handled
-    await audio.play();
-  } catch (err) {
-    console.log('Audio play failed:', err);
-    // If audio fails, we might want to show a message to the user
-    // about enabling audio permissions
-  }
-}
+  await confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+  });
+};
 
 export const fireConfetti = () => {
+  // Initialize audio on first use
+  const audioInstance = initAudio();
+
+  // Play sound if audio is available
+  if (audioInstance) {
+    // Reset audio to start if it's already playing
+    audioInstance.currentTime = 0;
+    audioInstance.play().catch(() => {
+      // Silently handle any autoplay restrictions
+      console.debug('Audio playback was prevented');
+    });
+  }
+
   // Call playConfettiWithSound but don't wait for it
   playConfettiWithSound();
   
