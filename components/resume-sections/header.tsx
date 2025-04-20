@@ -1,5 +1,5 @@
 import { Github, Linkedin, MapPin, Phone, Mail } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface HeaderProps {
   userData: {
@@ -35,7 +35,7 @@ export function Header({ userData, nameColor }: HeaderProps) {
   }, []);
 
   // Function to calculate and set the appropriate scale
-  const updateScale = () => {
+  const updateScale = useCallback(() => {
     if (containerRef.current && contentRef.current) {
       const containerWidth = containerRef.current.offsetWidth - 8; // Account for safe padding
       const contentWidth = contentRef.current.scrollWidth;
@@ -47,7 +47,7 @@ export function Header({ userData, nameColor }: HeaderProps) {
         setScale(1);
       }
     }
-  };
+  }, [isMobile, isVerySmallScreen]);
 
   useEffect(() => {
     const handleResize = () => {
