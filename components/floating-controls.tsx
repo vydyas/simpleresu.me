@@ -84,7 +84,10 @@ export function FloatingControls({
     try {
       trackEvents.resumePrinted();
       await window.print();
-      fireConfetti();
+      // Only fire confetti on desktop
+      if (!isMobile) {
+        fireConfetti();
+      }
     } catch (error) {
       console.error('Print failed:', error);
     }

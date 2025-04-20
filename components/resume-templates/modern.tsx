@@ -1,3 +1,4 @@
+import React from 'react';
 import { Card } from "@/components/ui/card";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -12,6 +13,7 @@ interface ModernTemplateProps {
   borderColor: string;
   zoomStyle: React.CSSProperties;
   resumeBackgroundColor?: string;
+  isMobileOrTablet?: boolean;
 }
 
 export function ModernTemplate({
@@ -22,6 +24,7 @@ export function ModernTemplate({
   borderColor,
   zoomStyle,
   resumeBackgroundColor,
+  isMobileOrTablet,
 }: ModernTemplateProps) {
   return (
     <div className="resume-container w-full">
@@ -46,7 +49,7 @@ export function ModernTemplate({
                   strategy={verticalListSortingStrategy}
                 >
                   {lines.map((line) => (
-                    <DraggableLine key={line.id} id={line.id}>
+                    <DraggableLine key={line.id} id={line.id} isMobileOrTablet={isMobileOrTablet}>
                       <div className={`
                         text-sm sm:text-base
                         ${line.type === 'header' ? 'col-span-2 text-center mb-4 sm:mb-6' : ''}

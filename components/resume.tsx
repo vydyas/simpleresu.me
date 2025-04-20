@@ -20,6 +20,7 @@ import { DefaultTemplate } from './resume-templates/default';
 import { ModernTemplate } from './resume-templates/modern';
 // import Image from 'next/image';
 import { ResumeConfig, UserData } from '@/types/resume';
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface ResumeProps {
   userData: UserData & {
@@ -65,6 +66,7 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
     const [lines, setLines] = useState<LineItem[]>([]);
     const [showSaveIndicator, setShowSaveIndicator] = useState(false);
     const [isFirstLoad, setIsFirstLoad] = useState(true);
+    const isMobileOrTablet = useMediaQuery("(max-width: 1024px)");
 
     const { nameFont, nameColor, borderColor, skillsStyle, resumeBackgroundColor } = useStyling();
 
@@ -177,23 +179,24 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
 
     const handleDragEnd = useCallback(
       (event: DragEndEvent) => {
-        const { active, over } = event;
+        // Disable drag and drop on mobile/tablet
+        if (isMobileOrTablet) return;
 
+        const { active, over } = event;
         if (active.id !== over?.id) {
           setLines((items) => {
             const oldIndex = items.findIndex((item) => item.id === active.id);
             const newIndex = items.findIndex((item) => item.id === over?.id);
             const newItems = arrayMove(items, oldIndex, newIndex);
-            // Save the new order to localStorage
             const lineOrder = newItems.map((item) => item.id);
             localStorage.setItem("resumeLineOrder", JSON.stringify(lineOrder));
-            setShowSaveIndicator(true); // Show save indicator
-            setTimeout(() => setShowSaveIndicator(false), 2000); // Hide after 2 seconds
+            setShowSaveIndicator(true);
+            setTimeout(() => setShowSaveIndicator(false), 2000);
             return newItems;
           });
         }
       },
-      [setShowSaveIndicator]
+      [isMobileOrTablet, setShowSaveIndicator]
     );
 
     const applyStoredLineOrder = useCallback((generatedLines: LineItem[]) => {
@@ -252,90 +255,43 @@ export const Resume = forwardRef<ResumeRef, ResumeProps>(
       return <ResumeShimmer />;
     }
 
-    const TemplateComponent = template === 'modern' ? ModernTemplate : DefaultTemplate;
 
     return (
-      <div className="min-h-full resume-container w-full px-4 md:px-0 md:w-[220mm]">
-        {/* <div className="flex justify-center gap-2 my-4">
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            <Image
-              src="https://www.google.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Google"
-              className="w-4 h-4"
-            />
-            Google
-          </div>
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-gray-800">
-            <Image
-              src="https://www.microsoft.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Microsoft"
-              className="w-4 h-4"
-            />
-            Microsoft
-          </div>
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-900">
-            <Image
-              src="https://www.facebook.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Meta"
-              className="w-4 h-4"
-            />
-            Meta
-          </div>
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-900">
-            <Image
-              src="https://www.netflix.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Netflix"
-              className="w-4 h-4"
-            />
-            Netflix
-          </div>
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-yelow-100 text-gray-900">
-            <Image
-              src="https://www.apple.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Apple"
-              className="w-4 h-4"
-            />
-            Apple
-          </div>
-          <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-gray-900">
-            <Image
-              src="https://www.salesforce.com/favicon.ico"
-              width={16}
-              height={16}
-              alt="Salesforce"
-              className="w-4 h-4"
-            />
-            Salesforce
-          </div>
-        </div> */}
-        <TemplateComponent
-          lines={lines}
-          onDragEnd={handleDragEnd}
-          resumeRef={resumeContainerRef}
-          wrapperClass={`mx-auto bg-white overflow-hidden shadow-lg my-4 md:my-8 max-w-full md:max-w-[210mm]`}
-          borderColor={borderColor}
-          zoomStyle={{
-            transform: `scale(${zoom / 100})`,
-            transformOrigin: "top center",
-            width: zoom > 100 ? `${(100 * 100) / zoom}%` : "100%",
-            margin: "0 auto",
-          }}
-          resumeBackgroundColor={resumeBackgroundColor}
-        />
+      <div
+        ref={resumeContainerRef}
+        className={`resume-container bg-${resumeBackgroundColor} relative`}
+        style={{
+          transform: `scale(${zoom / 100})`,
+          transformOrigin: "top center",
+        }}
+      >
+        {template === "default" ? (
+          <DefaultTemplate
+            lines={lines}
+            onDragEnd={handleDragEnd}
+            isMobileOrTablet={isMobileOrTablet}
+            resumeRef={resumeContainerRef}
+            wrapperClass="w-full"
+            borderColor={borderColor}
+            zoomStyle={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}
+            resumeBackgroundColor={resumeBackgroundColor}
+          />
+        ) : (
+          <ModernTemplate
+            lines={lines}
+            onDragEnd={handleDragEnd}
+            isMobileOrTablet={isMobileOrTablet}
+            resumeRef={resumeContainerRef}
+            wrapperClass="w-full"
+            borderColor={borderColor}
+            zoomStyle={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}
+            resumeBackgroundColor={resumeBackgroundColor}
+          />
+        )}
         {showSaveIndicator && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1 rounded-md transition-opacity shadow-sm z-50">
+          <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md flex items-center gap-2 shadow-lg z-50">
             <Check className="w-4 h-4" />
-            <span className="text-sm">Saved</span>
+            <span>Order saved!</span>
           </div>
         )}
       </div>
