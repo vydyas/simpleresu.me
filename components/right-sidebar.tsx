@@ -11,16 +11,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { RichTextEditor } from "@/components/rich-text-editor";
-import { Trash2, Plus, Pencil, ArrowUp } from "lucide-react";
+import { Trash2, Plus, Pencil } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Eye, EyeOff } from "lucide-react";
-import { ResumeConfig, isValidConfigKey } from "@/lib/resume-config";
+import { ResumeConfig, useResumeConfig } from "@/lib/resume-config";
 import debounce from "lodash/debounce";
 import { FloatingControls } from './floating-controls';
 import { OnlineUsers } from './online-users';
 import { ResumeScore } from './resume-score';
 import { UserData as UserDataType } from "@/types/resume";
 import Link from "next/link";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface CustomSection {
   id: string;
@@ -80,6 +81,7 @@ interface RightSidebarProps {
   onUserDataChange: (data: Partial<UserData>) => void;
   zoom: number;
   onZoomChange: (zoom: number) => void;
+  onClose?: () => void;
 }
 
 export function RightSidebar({
@@ -89,10 +91,12 @@ export function RightSidebar({
   onUserDataChange,
   zoom,
   onZoomChange,
+  onClose,
 }: RightSidebarProps) {
+  const { isLoaded } = useResumeConfig();
   const [editingTitle, setEditingTitle] = useState<string | null>(null);
-  const [showScrollTop, setShowScrollTop] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMediaQuery('(max-width: 1024px)');
 
   // Create a memoized version of the debounce function
   const debouncedUpdate = useMemo(
@@ -273,27 +277,6 @@ export function RightSidebar({
     [userData, onUserDataChange]
   );
 
-  // Add scroll listener
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    
-    const handleScroll = () => {
-      if (scrollContainer) {
-        setShowScrollTop(scrollContainer.scrollTop > 300);
-      }
-    };
-
-    scrollContainer?.addEventListener('scroll', handleScroll);
-    return () => scrollContainer?.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const scrollToTop = () => {
-    scrollContainerRef.current?.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-
   // Calculate resume score
   const calculateResumeScore = () => {
     let score = 0;
@@ -403,25 +386,112 @@ export function RightSidebar({
     });
   };
 
+  // Render visibility toggle button
+  const renderVisibilityToggle = (section: keyof ResumeConfig) => {
+    if (!isLoaded) return null;
+    
+    const isVisible = config[section];
+    return (
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onConfigChange(section, !isVisible);
+        }}
+        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center justify-center"
+        aria-label={`${isVisible ? 'Hide' : 'Show'} ${section.replace('show', '').toLowerCase()} section`}
+      >
+        {isVisible ? (
+          <Eye className="w-4 h-4" />
+        ) : (
+          <EyeOff className="w-4 h-4" />
+        )}
+      </button>
+    );
+  };
+
   return (
-    <div className="bg-background shadow-md h-screen flex flex-col right-sidebar">
+    <div className="bg-background shadow-md h-screen flex flex-col right-sidebar lg:relative">
       <div className="p-4">
         <div className="rounded-2xl bg-white/60 shadow-lg backdrop-blur-xl border border-white/40 p-4 mx-auto transition-all duration-300 bg-white/70 dark:bg-white/20 dark:bg-white/30 shadow-xl group border-b-4 border-purple-600">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent whitespace-nowrap transition-transform duration-500 ease-out group-hover:scale-105">
               simpleresu.me
             </h1>
-            <div className="flex items-center gap-4">
-              <Link 
-                href="/job-tracker"
-                className="relative px-4 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 group/link hover:text-primary dark:hover:text-primary transition-colors duration-200"
-              >
-                <span className="relative z-10">Job Tracker</span>
-                <span className="absolute inset-0 bg-gray-100 dark:bg-gray-800 rounded-full scale-x-0 group-hover/link:scale-x-100 transition-transform origin-left duration-200 ease-out" />
-                <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-primary scale-x-0 group-hover/link:scale-x-100 transition-transform origin-left duration-200 ease-out" />
-              </Link>
-              <OnlineUsers />
-            </div>
+            {isMobile ? (
+              <div className="flex items-center gap-2 w-full">
+                <Button 
+                  onClick={onClose}
+                  className="flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-full transition-all duration-200 flex-shrink-0"
+                  variant="ghost"
+                  size="sm"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                  <span className="text-sm">Back to Builder</span>
+                </Button>
+                <Link 
+                  href="/job-tracker"
+                  className="group flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-full transition-all duration-200 flex-shrink-0"
+                >
+                  <span className="text-sm">Job Tracker</span>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
+                <div className="flex items-center ml-auto">
+                  <OnlineUsers />
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <Link 
+                  href="/job-tracker"
+                  className="relative px-4 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 group/link hover:text-white dark:hover:text-white transition-all duration-200 w-full sm:w-auto flex justify-center items-center bg-white/50 dark:bg-gray-800/50 hover:bg-gradient-to-r hover:from-primary hover:to-purple-600 rounded-full border border-gray-200/50 dark:border-gray-700/50 hover:border-transparent shadow-sm hover:shadow-md"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    <svg
+                      className="w-4 h-4 transition-transform group-hover/link:translate-x-0.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                    <span>Job Tracker</span>
+                  </span>
+                </Link>
+                <div className="flex-shrink-0">
+                  <OnlineUsers />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -441,25 +511,10 @@ export function RightSidebar({
               key="personal-info"
             >
               <div className="flex items-center justify-between bg-muted px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-                <AccordionTrigger className="text-sm font-bold hover:no-underline">
+                <AccordionTrigger className="text-sm font-bold hover:no-underline flex-1">
                   Personal Information
                 </AccordionTrigger>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (isValidConfigKey("showPhoto")) {
-                      onConfigChange("showPhoto", !config.showPhoto);
-                    }
-                  }}
-                  className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  aria-label={config.showPhoto ? "Hide photo" : "Show photo"}
-                >
-                  {config.showPhoto ? (
-                    <Eye className="w-4 h-4" />
-                  ) : (
-                    <EyeOff className="w-4 h-4" />
-                  )}
-                </button>
+                {renderVisibilityToggle('showPhoto')}
               </div>
               <AccordionContent className="p-4 text-lg">
                 <div className="space-y-4">
@@ -579,27 +634,10 @@ export function RightSidebar({
               key="summary"
             >
               <div className="flex items-center justify-between bg-muted px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-                <AccordionTrigger className="text-sm font-bold hover:no-underline">
+                <AccordionTrigger className="text-sm font-bold hover:no-underline flex-1">
                   Summary
                 </AccordionTrigger>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (isValidConfigKey("showSummary")) {
-                      onConfigChange("showSummary", !config.showSummary);
-                    }
-                  }}
-                  className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  aria-label={
-                    config.showSummary ? "Hide summary" : "Show summary"
-                  }
-                >
-                  {config.showSummary ? (
-                    <Eye className="w-4 h-4" />
-                  ) : (
-                    <EyeOff className="w-4 h-4" />
-                  )}
-                </button>
+                {renderVisibilityToggle('showSummary')}
               </div>
               <AccordionContent className="p-4 text-lg">
                 <RichTextEditor
@@ -614,29 +652,10 @@ export function RightSidebar({
               key="experience"
             >
               <div className="flex items-center justify-between bg-muted px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-                <AccordionTrigger className="text-sm font-bold hover:no-underline">
+                <AccordionTrigger className="text-sm font-bold hover:no-underline flex-1">
                   Experience
                 </AccordionTrigger>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (isValidConfigKey("showExperience")) {
-                      onConfigChange("showExperience", !config.showExperience);
-                    }
-                  }}
-                  className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  aria-label={
-                    config.showExperience
-                      ? "Hide experience section"
-                      : "Show experience section"
-                  }
-                >
-                  {config.showExperience ? (
-                    <Eye className="w-4 h-4" />
-                  ) : (
-                    <EyeOff className="w-4 h-4" />
-                  )}
-                </button>
+                {renderVisibilityToggle('showExperience')}
               </div>
               <AccordionContent className="p-4 text-lg">
                 <Accordion
@@ -793,29 +812,10 @@ export function RightSidebar({
               key="education"
             >
               <div className="flex items-center justify-between bg-muted px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-                <AccordionTrigger className="text-sm font-bold hover:no-underline">
+                <AccordionTrigger className="text-sm font-bold hover:no-underline flex-1">
                   Education
                 </AccordionTrigger>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (isValidConfigKey("showEducation")) {
-                      onConfigChange("showEducation", !config.showEducation);
-                    }
-                  }}
-                  className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  aria-label={
-                    config.showEducation
-                      ? "Hide education section"
-                      : "Show education section"
-                  }
-                >
-                  {config.showEducation ? (
-                    <Eye className="w-4 h-4" />
-                  ) : (
-                    <EyeOff className="w-4 h-4" />
-                  )}
-                </button>
+                {renderVisibilityToggle('showEducation')}
               </div>
               <AccordionContent className="p-4 text-lg">
                 <Accordion
@@ -965,29 +965,10 @@ export function RightSidebar({
               key="skills"
             >
               <div className="flex items-center justify-between bg-muted px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-                <AccordionTrigger className="text-sm font-bold hover:no-underline">
+                <AccordionTrigger className="text-sm font-bold hover:no-underline flex-1">
                   Skills
                 </AccordionTrigger>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (isValidConfigKey("showSkills")) {
-                      onConfigChange("showSkills", !config.showSkills);
-                    }
-                  }}
-                  className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  aria-label={
-                    config.showSkills
-                      ? "Hide skills section"
-                      : "Show skills section"
-                  }
-                >
-                  {config.showSkills ? (
-                    <Eye className="w-4 h-4" />
-                  ) : (
-                    <EyeOff className="w-4 h-4" />
-                  )}
-                </button>
+                {renderVisibilityToggle('showSkills')}
               </div>
               <AccordionContent className="p-4 text-lg">
                 <Accordion
@@ -1037,29 +1018,10 @@ export function RightSidebar({
               key="projects"
             >
               <div className="flex items-center justify-between bg-muted px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-                <AccordionTrigger className="text-sm font-bold hover:no-underline">
+                <AccordionTrigger className="text-sm font-bold hover:no-underline flex-1">
                   Projects
                 </AccordionTrigger>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (isValidConfigKey("showProjects")) {
-                      onConfigChange("showProjects", !config.showProjects);
-                    }
-                  }}
-                  className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  aria-label={
-                    config.showProjects
-                      ? "Hide projects section"
-                      : "Show projects section"
-                  }
-                >
-                  {config.showProjects ? (
-                    <Eye className="w-4 h-4" />
-                  ) : (
-                    <EyeOff className="w-4 h-4" />
-                  )}
-                </button>
+                {renderVisibilityToggle('showProjects')}
               </div>
               <AccordionContent className="p-4 text-lg">
                 <Accordion type="multiple" className="w-full space-y-2" key="projects-accordion">
@@ -1130,7 +1092,7 @@ export function RightSidebar({
                 className="border rounded-lg group"
               >
                 <div className="flex items-center justify-between bg-muted px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-                  <AccordionTrigger className="text-sm font-bold hover:no-underline">
+                  <AccordionTrigger className="text-sm font-bold hover:no-underline flex-1">
                     {renderSectionTitle(section.title, section.id)}
                   </AccordionTrigger>
                   <div className="flex items-center gap-2">
@@ -1183,29 +1145,10 @@ export function RightSidebar({
               key="certifications"
             >
               <div className="flex items-center justify-between bg-muted px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800">
-                <AccordionTrigger className="text-sm font-bold hover:no-underline">
+                <AccordionTrigger className="text-sm font-bold hover:no-underline flex-1">
                   Certifications
                 </AccordionTrigger>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (isValidConfigKey("showCertifications")) {
-                      onConfigChange("showCertifications", !config.showCertifications);
-                    }
-                  }}
-                  className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                  aria-label={
-                    config.showCertifications
-                      ? "Hide certifications section"
-                      : "Show certifications section"
-                  }
-                >
-                  {config.showCertifications ? (
-                    <Eye className="w-4 h-4" />
-                  ) : (
-                    <EyeOff className="w-4 h-4" />
-                  )}
-                </button>
+                {renderVisibilityToggle('showCertifications')}
               </div>
               <AccordionContent className="p-4 text-lg">
                 <Accordion
@@ -1316,40 +1259,16 @@ export function RightSidebar({
               </AccordionContent>
             </AccordionItem>
           </Accordion>
-
-          {/* Scroll to Top Button */}
-          {showScrollTop && (
-            <Button
-              onClick={scrollToTop}
-              className="fixed bottom-24 right-8 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-600 hover:text-gray-900 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-gray-200"
-              size="icon"
-              variant="ghost"
-            >
-              <div className="flex items-center justify-center w-full h-full">
-                <ArrowUp className="h-4 w-4 transition-transform group-hover:translate-y-[-2px]" />
-              </div>
-            </Button>
-          )}
         </div>
-        <div className="flex justify-between p-4 border-t bg-background">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t bg-background">
           <FloatingControls
             zoom={zoom}
             onZoomChange={onZoomChange}
+            onAddCustomSection={handleAddCustomSection}
+            resumeScore={resumeScore}
           />
-          <Button 
-            onClick={handleAddCustomSection} 
-            className="w-[180px] bg-gradient-to-r from-purple-600/80 to-blue-500/80 text-white hover:text-white hover:from-purple-600 hover:to-blue-500 transition-all duration-300 shadow-sm hover:shadow-md"
-            variant="ghost"
-          >
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full bg-white/20 flex items-center justify-center">
-                <Plus className="h-3 w-3" />
-              </div>
-              <span className="text-sm font-medium">Add Custom Section</span>
-            </div>
-          </Button>
         </div>
-        <ResumeScore score={resumeScore} />
+        {!isMobile && <ResumeScore score={resumeScore} />}
       </div>
     </div>
   );

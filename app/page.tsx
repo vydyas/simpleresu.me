@@ -1,23 +1,15 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import dynamic from "next/dynamic";
-import { ResumeShimmer } from "@/components/resume-shimmer";
 import { initialUserData } from "@/data/initial-user-data";
-import { ClientRightSidebar } from "@/components/client-right-sidebar";
-import { defaultConfig, ResumeConfig } from "@/lib/resume-config";
+import { defaultConfig, ResumeConfig, useResumeConfig } from "@/lib/resume-config";
 import { ResumeRef } from "@/components/resume";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { UserData } from '@/types/resume';
 import { ErrorBoundary } from '@/components/error-boundary';
-
-const Resume = dynamic(
-  () => import("@/components/resume").then((mod) => mod.Resume),
-  {
-    ssr: false,
-    loading: () => <ResumeShimmer />
-  }
-);
+import { MobileSidebar } from '@/components/mobile-sidebar';
+import { RightSidebar } from "@/components/right-sidebar";
+import { Resume as ResumeComponent } from "@/components/resume";
 
 type ConfigKey = keyof ResumeConfig;
 
@@ -26,23 +18,10 @@ const isValidConfigKey = (key: string): key is ConfigKey => {
 };
 
 export default function LandingPage() {
+  const { config, updateConfig, isLoaded } = useResumeConfig();
   const [activeTemplate, setActiveTemplate] = useState("default");
   const [githubId, setGithubId] = useState("vydyas");
-  const [zoom, setZoom] = useState(() => {
-    if (typeof window !== "undefined") {
-      const savedZoom = localStorage.getItem("resumeZoom");
-      return savedZoom ? Math.min(parseInt(savedZoom), 110) : 100;
-    }
-    return 100;
-  });
-  const [config, setConfig] = useState<ResumeConfig>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("resumeConfig");
-      return saved ? JSON.parse(saved) : defaultConfig;
-    }
-    return defaultConfig;
-  });
-
+  const [zoom, setZoom] = useState(100);
   const [userData, setUserData] = useState<UserData>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("resumeData");
@@ -93,10 +72,7 @@ export default function LandingPage() {
       console.error(`Invalid config key: ${stringKey}`);
       return;
     }
-    setConfig((prevConfig) => ({
-      ...prevConfig,
-      [stringKey]: value,
-    }));
+    updateConfig(stringKey, value);
   };
 
   const handleUserDataChange = (newData: Partial<UserData>) => {
@@ -106,37 +82,68 @@ export default function LandingPage() {
     }));
   };
 
+  // Don't render until client-side hydration is complete
+  if (!isLoaded) {
+    return null; // or a loading spinner
+  }
+
   return (
     <ErrorBoundary>
-      <div className="flex bg-white h-screen">
-        <PanelGroup direction="horizontal">
-          <Panel defaultSize={60} minSize={50}>
-            <div className="flex justify-center flex-col items-center">
-              <Resume
-                key={JSON.stringify(userData)}
-                ref={resumeRef}
-                template={template}
-                githubId={githubId}
-                config={config}
-                userData={userData}
-                zoom={zoom}
-              />
-            </div>
-          </Panel>
-          <PanelResizeHandle className="w-2 hover:bg-gray-300 transition-colors resize-handle">
-            <div className="w-1 h-full mx-auto bg-gray-200" />
-          </PanelResizeHandle>
-          <Panel defaultSize={40} minSize={30}>
-            <ClientRightSidebar
+      <div className="flex flex-col lg:flex-row bg-white min-h-screen">
+        {/* Mobile View */}
+        <div className="w-full lg:hidden">
+          <div className="flex flex-col items-center">
+            <ResumeComponent
+              key={JSON.stringify(userData)}
+              ref={resumeRef}
+              template={template}
+              githubId={githubId}
               config={config}
-              onConfigChange={handleConfigChange}
               userData={userData}
-              onUserDataChange={handleUserDataChange}
               zoom={zoom}
-              onZoomChange={setZoom}
             />
-          </Panel>
-        </PanelGroup>
+          </div>
+          <MobileSidebar
+            config={config}
+            onConfigChange={handleConfigChange}
+            userData={userData}
+            onUserDataChange={handleUserDataChange}
+            zoom={zoom}
+            onZoomChange={setZoom}
+          />
+        </div>
+        
+        {/* Desktop View */}
+        <div className="hidden lg:flex w-full">
+          <PanelGroup direction="horizontal">
+            <Panel defaultSize={60} minSize={50}>
+              <div className="flex justify-center flex-col items-center">
+                <ResumeComponent
+                  key={JSON.stringify(userData)}
+                  ref={resumeRef}
+                  template={template}
+                  githubId={githubId}
+                  config={config}
+                  userData={userData}
+                  zoom={zoom}
+                />
+              </div>
+            </Panel>
+            <PanelResizeHandle className="w-2 hover:bg-gray-300 transition-colors resize-handle">
+              <div className="w-1 h-full mx-auto bg-gray-200" />
+            </PanelResizeHandle>
+            <Panel defaultSize={40} minSize={30}>
+              <RightSidebar
+                config={config}
+                onConfigChange={handleConfigChange}
+                userData={userData}
+                onUserDataChange={handleUserDataChange}
+                zoom={zoom}
+                onZoomChange={setZoom}
+              />
+            </Panel>
+          </PanelGroup>
+        </div>
       </div>
     </ErrorBoundary>
   );

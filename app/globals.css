@@ -47,6 +47,22 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
   }
+
+  html {
+    font-size: 14px;
+  }
+  
+  @screen sm {
+    html {
+      font-size: 15px;
+    }
+  }
+  
+  @screen md {
+    html {
+      font-size: 16px;
+    }
+  }
 }
 
 body {
@@ -140,7 +156,16 @@ ol {
   list-style: circle;
 }
 
-/* Add these print styles */
+/* Add this near the top of the file, after the @tailwind directives */
+
+/* Print-specific utility class */
+.no-print {
+  @media print {
+    display: none !important;
+  }
+}
+
+/* Update the print media query section */
 @media print {
   /* Show only resume content */
   .resume-container {
@@ -161,19 +186,22 @@ ol {
     margin: 0 !important;
     padding: 0 !important;
     box-shadow: none !important;
-
-
     page-break-inside: avoid;
     break-inside: avoid;
   }
 
-  /* Hide floating controls */
+  /* Hide UI elements when printing */
   .floating-controls,
   .resize-handle,
   .right-sidebar,
   .nextjs-toast,
-  .company-badges {
+  .company-badges,
+  .no-print,
+  [class*="mobile-sidebar"],
+  [class*="hamburger"] {
     display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
   }
 
   /* Reset any zoom transforms */
@@ -184,7 +212,7 @@ ol {
   /* Update page settings */
   @page {
     margin: 0;
-    /* size: 220mm 297mm; */
+    size: 210mm 297mm;
     background-color: white;
   }
 
@@ -210,14 +238,19 @@ ol {
   /* Chrome specific */
   body {
     background: white !important;
-
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-    width: 100% !important;
-    /* width: 210mm !important; */
+    width: 210mm !important;
+    height: 297mm !important;
     margin: 0 auto !important;
-    margin-right: 10px;
-    zoom: 0.95; 
+    padding: 0 !important;
+  }
+
+  /* Ensure mobile elements are hidden */
+  .fixed,
+  .absolute {
+    position: static !important;
+    display: none !important;
   }
 }
 
@@ -353,4 +386,98 @@ input[type="color"]::-moz-color-swatch {
 
 .animate-attention {
   animation: attention-pulse 1s ease-in-out;
+}
+
+/* Update resume container styles */
+.resume-container {
+  width: 100%;
+  padding: 0.5rem;
+  margin: 0 auto;
+  overflow-x: hidden;
+}
+
+@screen sm {
+  .resume-container {
+    padding: 1rem;
+  }
+}
+
+@screen md {
+  .resume-container {
+    padding: 1.5rem;
+    width: 220mm;
+  }
+}
+
+/* Update resume content styles */
+.resume-content {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+@screen sm {
+  .resume-content {
+    font-size: 0.9375rem;
+    line-height: 1.375rem;
+  }
+}
+
+@screen md {
+  .resume-content {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    max-width: 210mm;
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 1024px) {
+  .right-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    z-index: 40;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .resume-container {
+    padding: 0.5rem;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+
+  .resume-content {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  /* Improve touch interactions */
+  .accordion-trigger {
+    padding: 1rem;
+  }
+
+  .accordion-content {
+    padding: 1rem;
+  }
+
+  /* Make buttons more touch-friendly */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improve form input touch targets */
+  input, textarea, select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
 }

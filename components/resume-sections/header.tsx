@@ -1,4 +1,5 @@
 import { Github, Linkedin, MapPin, Phone, Mail } from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface HeaderProps {
   userData: {
@@ -16,78 +17,145 @@ interface HeaderProps {
 }
 
 export function Header({ userData, nameColor }: HeaderProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isVerySmallScreen, setIsVerySmallScreen] = useState(false);
+
+  // Check screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 640);
+      setIsVerySmallScreen(window.innerWidth < 380);
+    };
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // Function to calculate and set the appropriate scale
+  const updateScale = useCallback(() => {
+    if (containerRef.current && contentRef.current) {
+      const containerWidth = containerRef.current.offsetWidth - 8; // Account for safe padding
+      const contentWidth = contentRef.current.scrollWidth;
+      if (contentWidth > containerWidth) {
+        const newScale = containerWidth / contentWidth;
+        const minScale = isVerySmallScreen ? 0.4 : (isMobile ? 0.5 : 0.65);
+        setScale(Math.max(minScale, newScale * 0.95)); // Add 5% buffer for safety
+      } else {
+        setScale(1);
+      }
+    }
+  }, [isMobile, isVerySmallScreen]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setTimeout(updateScale, 100);
+    };
+
+    updateScale();
+    const resizeObserver = new ResizeObserver(handleResize);
+    
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    
+    window.addEventListener('resize', handleResize);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isMobile, isVerySmallScreen, updateScale]);
+
   return (
-    <div className="text-center">
-      <div className={`text-4xl font-bold uppercase`}>
+    <div className="text-center px-0 max-w-4xl mx-auto">
+      {/* Name Section */}
+      <div className={`text-2xl sm:text-3xl md:text-4xl font-bold uppercase mb-1 sm:mb-2`}>
         <span style={{ color: nameColor }}>{userData.firstName}</span>{' '}
         <span style={{ color: nameColor }}>{userData.lastName}</span>
       </div>
+
+      {/* Headline Section */}
       {userData.headline && (
-        <p className="text-gray-600 mt-1 text-lg">{userData.headline}</p>
+        <p className="text-gray-600 mb-1 sm:mb-2 text-sm sm:text-base md:text-lg">{userData.headline}</p>
       )}
-      <div className="flex justify-center gap-4 mt-1 text-base text-gray-600 flex-wrap mb-2">
-        <div className="flex items-center gap-1 text-base">
-          {/* Contact Info */}
-          {userData.email && (
-            <div className="flex items-center gap-1">
-              <Mail className="w-4 h-4" />
-              <a 
-                href={`mailto:${userData.email}`}
-                className="hover:text-primary transition-colors cursor-pointer select-all"
-                title="Click to copy or send email"
-              >
+      
+      {/* Contact Information Section - Auto-scaling Container */}
+      <div ref={containerRef} className="relative w-full max-w-4xl mx-auto overflow-hidden py-0.5">
+        <div 
+          ref={contentRef}
+          className="flex items-center justify-start text-[10.5px] xs:text-[11px] sm:text-sm text-gray-600 whitespace-nowrap w-full pl-0.5"
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: 'left',
+            transition: 'transform 0.2s ease-out',
+            width: scale < 1 ? `${(1 / scale) * 100}%` : '100%',
+            marginLeft: '10%'
+          }}
+        >
+          {/* Contact Items Container - Removed all extra spacing */}
+          <div className="inline-flex items-center gap-x-1 xs:gap-x-1 sm:gap-x-2">
+            {/* Email */}
+            <div className="inline-flex items-center min-w-fit">
+              <Mail className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0 text-gray-500 mr-0.5" />
+              <span className="select-all" title={userData.email}>
                 {userData.email}
-              </a>
-            </div>
-          )}
-          {userData.phoneNumber && (
-            <div className="flex items-center gap-1">
-              • <Phone className="w-4 h-4" />
-              <a 
-                href={`tel:${userData.phoneNumber}`}
-                className="hover:text-primary transition-colors cursor-pointer select-all"
-                title="Click to copy or call"
-              >
-                {userData.phoneNumber}
-              </a>
-            </div>
-          )}
-          {userData.location && (
-            <div className="flex items-center gap-1">
-              • <MapPin className="w-4 h-4" />
-              <span className="select-all">{userData.location}</span>
-            </div>
-          )}
-          {userData.githubId && (
-            <div className="flex items-center gap-1">
-              <span>
-                <a
-                  href={`https://github.com/${userData.githubId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 hover:text-primary transition-colors"
-                >
-                  • <Github className="w-4 h-4" />
-                  Github
-                </a>
               </span>
             </div>
-          )}
-          {userData.linkedinId && (
-            <div className="flex items-center gap-1">
-              <span>
-                <a
-                  href={`https://www.linkedin.com/in/${userData.linkedinId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 hover:text-primary transition-colors"
-                >
-                  • <Linkedin className="w-4 h-4" />
-                  LinkedIn
-                </a>
-              </span>
-            </div>
-          )}
+            
+            {/* Phone - Minimized bullet spacing */}
+            {userData.phoneNumber && (
+              <>
+                <span className="text-gray-300 text-[6px] xs:text-[8px] sm:text-[10px] flex-shrink-0 mx-0">•</span>
+                <div className="inline-flex items-center min-w-fit">
+                  <Phone className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0 text-gray-500 mr-0.5" />
+                  <span className="select-all" title={userData.phoneNumber}>
+                    {userData.phoneNumber}
+                  </span>
+                </div>
+              </>
+            )}
+            
+            {/* Location - Minimized bullet spacing */}
+            {userData.location && (
+              <>
+                <span className="text-gray-300 text-[6px] xs:text-[8px] sm:text-[10px] flex-shrink-0 mx-0">•</span>
+                <div className="inline-flex items-center min-w-fit">
+                  <MapPin className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0 text-gray-500 mr-0.5" />
+                  <span className="select-all" title={userData.location}>
+                    {userData.location}
+                  </span>
+                </div>
+              </>
+            )}
+            
+            {/* Github - Minimized bullet spacing */}
+            {userData.githubId && (
+              <>
+                <span className="text-gray-300 text-[6px] xs:text-[8px] sm:text-[10px] flex-shrink-0 mx-0">•</span>
+                <div className="inline-flex items-center min-w-fit">
+                  <Github className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0 text-gray-500 mr-0.5" />
+                  <span className="select-all" title={`github.com/${userData.githubId}`}>
+                    {userData.githubId}
+                  </span>
+                </div>
+              </>
+            )}
+            
+            {/* LinkedIn - Minimized bullet spacing */}
+            {userData.linkedinId && (
+              <>
+                <span className="text-gray-300 text-[6px] xs:text-[8px] sm:text-[10px] flex-shrink-0 mx-0">•</span>
+                <div className="inline-flex items-center min-w-fit">
+                  <Linkedin className="w-2.5 h-2.5 xs:w-3 xs:h-3 sm:w-3.5 sm:h-3.5 flex-shrink-0 text-gray-500 mr-0.5" />
+                  <span className="select-all" title={`linkedin.com/in/${userData.linkedinId}`}>
+                    {userData.linkedinId}
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

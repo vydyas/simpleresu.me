@@ -5,9 +5,10 @@ import { CSS } from '@dnd-kit/utilities';
 interface DraggableLineProps {
   id: string;
   children: React.ReactNode;
+  isMobileOrTablet?: boolean;
 }
 
-export function DraggableLine({ id, children }: DraggableLineProps) {
+export function DraggableLine({ id, children, isMobileOrTablet }: DraggableLineProps) {
   const {
     attributes,
     listeners,
@@ -15,14 +16,14 @@ export function DraggableLine({ id, children }: DraggableLineProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({ id, disabled: isMobileOrTablet });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    cursor: 'move',
-    touchAction: 'none',
+    cursor: isMobileOrTablet ? 'default' : 'move',
+    touchAction: 'auto',
     position: 'relative' as const,
   };
 
@@ -30,9 +31,8 @@ export function DraggableLine({ id, children }: DraggableLineProps) {
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
-      className="group hover:bg-muted/50 rounded px-1 -mx-1"
+      {...(isMobileOrTablet ? {} : { ...attributes, ...listeners })}
+      className={`group ${!isMobileOrTablet ? 'hover:bg-muted/50' : ''} rounded px-1 -mx-1`}
     >
       {children}
     </div>

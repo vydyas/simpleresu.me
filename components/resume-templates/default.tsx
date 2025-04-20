@@ -1,3 +1,4 @@
+import React from 'react';
 import { Card } from "@/components/ui/card";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -12,6 +13,7 @@ interface DefaultTemplateProps {
   borderColor: string;
   zoomStyle: React.CSSProperties;
   resumeBackgroundColor?: string;
+  isMobileOrTablet?: boolean;
 }
 
 export function DefaultTemplate({
@@ -22,9 +24,10 @@ export function DefaultTemplate({
   borderColor,
   zoomStyle,
   resumeBackgroundColor,
+  isMobileOrTablet,
 }: DefaultTemplateProps) {
   return (
-    <div className="resume-container">
+    <div className="resume-container w-full">
       <div className="resume-content" style={zoomStyle}>
         <Card
           ref={resumeRef}
@@ -34,15 +37,17 @@ export function DefaultTemplate({
             backgroundColor: resumeBackgroundColor || '#ffffff'
           }}
         >
-          <div className="h-full overflow-y-auto px-4 py-2 border border-solid">
+          <div className="h-full overflow-y-auto px-2 sm:px-4 md:px-6 py-2 sm:py-4 border border-solid">
             <DndContext onDragEnd={onDragEnd}>
               <SortableContext
                 items={lines.map((item) => item.id)}
                 strategy={verticalListSortingStrategy}
               >
                 {lines.map((line) => (
-                  <DraggableLine key={line.id} id={line.id}>
-                    {line.content}
+                  <DraggableLine key={line.id} id={line.id} isMobileOrTablet={isMobileOrTablet}>
+                    <div className="text-sm sm:text-base">
+                      {line.content}
+                    </div>
                   </DraggableLine>
                 ))}
               </SortableContext>
