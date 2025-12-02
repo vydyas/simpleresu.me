@@ -1,49 +1,147 @@
+# SimpleResume
 
-<img width="584" alt="Screenshot 2024-12-25 at 3 57 41 PM" src="https://github.com/user-attachments/assets/95d817d8-6d61-41a3-8298-7d57fddec1cd" />
+Transforming Your Professional Profile Into a Standout Resume
 
-# Simple Resume
+## Project Structure
 
-Generate professional resumes effortlessly using data from LinkedIn and GitHub. Simple Resume makes resume creation quick, simple, and customizable.
+```
+simpleresu.me/
+├── frontend/          # Next.js frontend application
+├── backend/           # Express TypeScript API server
+└── package.json       # Root monorepo configuration
+```
 
-## Features
+## Getting Started
 
-- Generate resumes using LinkedIn and GitHub data.
-- Easy-to-use interface.
-- Supports multiple resume formats.
+### Prerequisites
 
-## Roadmap
+- Node.js (v20 or higher)
+- npm or yarn
 
-Here are the planned features and improvements for Simple Resume:
+### Installation
 
-1. **Responsiveness**: Ensure the application is fully responsive across all devices.
-2. **Login with LinkedIn**: Seamlessly integrate LinkedIn login for importing user data.
-3. **Login with GitHub**: Enable GitHub login for additional user data.
-4. **Multi-template Support**: Provide multiple resume templates for greater customization.
+1. Install dependencies for all packages:
 
-Stay tuned for updates as we work to bring these features to life!
+```bash
+npm install
+```
 
-## Contributing
+This will automatically install dependencies for the frontend, backend, and root workspace.
 
-We welcome contributions to enhance Simple Resume! Here's how you can get involved:
+### Development
 
-1. Fork the repository.
-2. Create a new branch: `git checkout -b feature-name`.
-3. Make your changes and commit them: `git commit -m "Add feature X"`.
-4. Push the changes to your fork: `git push origin feature-name`.
-5. Open a pull request to the `main` branch.
+Run both frontend and backend concurrently:
 
-### Raising Pull Requests (PRs)
+```bash
+npm run dev
+```
 
-- Follow the coding standards outlined in the repository.
-- Write clear and descriptive commit messages.
-- Include a summary of the changes and their purpose in your pull request.
+This will start:
+- **Frontend**: http://localhost:3000
+- **Backend**: http://localhost:3001
+- **API Documentation**: http://localhost:3001/api-docs
 
-Thank you for helping make Simple Resume better!
+Or run them separately:
+
+```bash
+# Frontend only
+npm run dev:frontend
+
+# Backend only
+npm run dev:backend
+```
+
+### API Documentation
+
+The backend includes interactive Swagger documentation. Once the backend is running, visit:
+
+**Swagger UI**: [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
+
+Features:
+- Interactive API testing
+- Complete endpoint documentation
+- Request/response examples
+- Schema definitions
+
+### Available Scripts
+
+#### Root Level
+
+- `npm run dev` - Run both frontend and backend concurrently
+- `npm run dev:frontend` - Run only the frontend
+- `npm run dev:backend` - Run only the backend
+- `npm run build` - Build both frontend and backend
+- `npm run build:frontend` - Build only the frontend
+- `npm run build:backend` - Build only the backend
+- `npm run start` - Start production backend server
+
+#### Frontend (cd frontend)
+
+- `npm run dev` - Start Next.js development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+#### Backend (cd backend)
+
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Compile TypeScript to JavaScript
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## Backend API Endpoints
+
+Base URL: `http://localhost:3001/api`
+
+### Resumes
+
+- `GET /api/resumes` - Get all resumes
+- `GET /api/resumes/:id` - Get a single resume by ID
+- `POST /api/resumes` - Create a new resume
+- `PUT /api/resumes/:id` - Update a resume
+- `DELETE /api/resumes/:id` - Delete a resume
+
+### Health Check
+
+- `GET /health` - API health check endpoint
+
+## Environment Variables
+
+### Backend
+
+Create a `.env` file in the `backend` directory:
+
+```env
+PORT=3001
+NODE_ENV=development
+```
+
+## Building for Production
+
+```bash
+# Build both frontend and backend
+npm run build
+
+# Start production server
+npm run start
+```
+
+## Technology Stack
+
+### Frontend
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS
+- Radix UI
+- Framer Motion
+
+### Backend
+- Node.js
+- Express
+- TypeScript
+- Swagger/OpenAPI
 
 ## License
 
-[MIT License](LICENSE)
-
-## Acknowledgments
-
-Thanks to everyone who has contributed to Simple Resume. Your support keeps this project going!
+MIT
