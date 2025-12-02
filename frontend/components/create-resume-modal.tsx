@@ -45,7 +45,7 @@ export function CreateResumeModal({ open, onOpenChange }: CreateResumeModalProps
             Create Your Resume
           </DialogTitle>
           <DialogDescription className="text-zinc-600 text-base">
-            Choose how you'd like to start building your professional resume
+            Choose how you&apos;d like to start building your professional resume
           </DialogDescription>
         </DialogHeader>
 
@@ -64,7 +64,7 @@ export function CreateResumeModal({ open, onOpenChange }: CreateResumeModalProps
                 Upload Your Resume
               </h3>
               <p className="text-sm text-zinc-600">
-                Upload an existing resume and we'll help you format and enhance it
+                Upload an existing resume and we&apos;ll help you format and enhance it
               </p>
             </div>
           </button>

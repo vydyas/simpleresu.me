@@ -1,7 +1,5 @@
 'use client';
 
-import { SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
-import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { SharedHeader } from '@/components/shared-header';
@@ -34,7 +32,7 @@ export default function LandingPage() {
       setCurrentSlide((prev) => (prev + 1) % resumeTemplates.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, []);
+  }, [resumeTemplates.length]);
 
   return (
     <div className="min-h-screen bg-white">

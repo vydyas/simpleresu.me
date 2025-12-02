@@ -17,10 +17,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { ResumeConfig, isValidConfigKey } from "@/lib/resume-config";
 import debounce from "lodash/debounce";
 import { FloatingControls } from './floating-controls';
-import { OnlineUsers } from './online-users';
 import { ResumeScore } from './resume-score';
 import { UserData as UserDataType } from "@/types/resume";
-import Link from "next/link";
 
 interface CustomSection {
   id: string;
