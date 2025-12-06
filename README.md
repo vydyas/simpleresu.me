@@ -1,147 +1,554 @@
-# SimpleResume
+# SimpleResu.me
 
-Transforming Your Professional Profile Into a Standout Resume
+<img width="584" alt="Screenshot 2024-12-25 at 3 57 41 PM" src="https://github.com/user-attachments/assets/95d817d8-6d61-41a3-8298-7d57fddec1cd" />
 
-## Project Structure
+**Transforming Your Professional Profile Into a Standout Resume**
 
-```
-simpleresu.me/
-├── frontend/          # Next.js frontend application
-├── backend/           # Express TypeScript API server
-└── package.json       # Root monorepo configuration
-```
+Generate professional resumes effortlessly using data from LinkedIn and GitHub. SimpleResu.me makes resume creation quick, simple, and customizable with a modern tech stack built for Vercel deployment.
 
-## Getting Started
+## ✨ Features
+
+- 📝 **Resume Builder**: Create beautiful resumes with real-time preview
+- 🔗 **LinkedIn Integration**: Import your professional profile automatically
+- 💻 **GitHub Integration**: Showcase your repositories and contributions
+- 🎨 **Multiple Templates**: Choose from various professional resume designs
+- 📊 **Job Tracker**: Organize your job applications with a Kanban-style board
+- 🔐 **Secure Authentication**: Powered by Clerk for seamless login (Google OAuth, Email, etc.)
+- ⚡ **Automatic User Sync**: Users automatically synced to database on first login
+- ☁️ **Cloud Storage**: All your data safely stored in Supabase
+- 📚 **Interactive API Docs**: Swagger UI at `/api-docs` for testing APIs
+- 🌓 **Dark Mode**: Built-in theme support for comfortable viewing
+- 📱 **Responsive Design**: Works beautifully on all devices
+
+---
+
+## 🏗️ Tech Stack
+
+- **Frontend**: Next.js 15 (App Router), React 19, TypeScript
+- **Styling**: Tailwind CSS, Radix UI, Framer Motion
+- **Authentication**: Clerk
+- **Database**: Supabase (PostgreSQL)
+- **Deployment**: Vercel
+- **Rich Text**: TipTap Editor
+- **Drag & Drop**: dnd-kit
+- **Validation**: Zod
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (v20 or higher)
-- npm or yarn
+- Node.js 18+ and npm
+- Clerk account ([clerk.com](https://clerk.com))
+- Supabase project ([supabase.com](https://supabase.com))
+- LinkedIn API credentials (optional, for OAuth)
 
 ### Installation
 
-1. Install dependencies for all packages:
+1. **Clone the repository**
 
-```bash
-npm install
+   ```bash
+   git clone https://github.com/yourusername/simpleresu.me.git
+   cd simpleresu.me
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+
+   Create a `.env` file in the root directory:
+
+   ```env
+   # Clerk Authentication
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_key_here
+   CLERK_SECRET_KEY=sk_test_your_secret_here
+
+   # Supabase Database
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
+
+   # LinkedIn OAuth (Optional)
+   NEXT_PUBLIC_LINKEDIN_CLIENT_ID=your_linkedin_client_id
+   LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret
+
+   # App URL
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   ```
+
+4. **Set up the database**
+
+   - Go to your Supabase project dashboard
+   - Navigate to the SQL Editor
+   - Run the migration script from `supabase-migration.sql`
+
+   ```bash
+   # The SQL file is located at:
+   # ./supabase-migration.sql
+   ```
+
+   This will create all necessary tables:
+   - `users` - User profiles synced with Clerk
+   - `resumes` - Resume data with JSONB fields
+   - `job_boards` - Job application boards
+   - `jobs` - Individual job applications
+   - `custom_sections` - Custom job status columns
+
+5. **Run the development server**
+
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 📁 Project Structure
+
+```
+simpleresu.me/
+├── app/                          # Next.js App Router
+│   ├── api/                      # API Routes
+│   │   ├── lib/                  # API utilities
+│   │   │   ├── auth.ts           # Clerk authentication helper
+│   │   │   ├── errors.ts         # Error handling
+│   │   │   ├── supabase-server.ts # Supabase admin client
+│   │   │   └── validation.ts     # Zod schemas
+│   │   ├── users/sync/           # User sync endpoint
+│   │   ├── resumes/              # Resume CRUD endpoints
+│   │   ├── job-boards/           # Job board endpoints
+│   │   ├── jobs/                 # Job CRUD endpoints
+│   │   └── linkedin/             # LinkedIn OAuth handlers
+│   ├── resume-builder/           # Resume builder page
+│   ├── job-tracker/              # Job tracker page
+│   ├── sign-in/                  # Auth pages
+│   └── layout.tsx                # Root layout
+├── components/                   # React components
+│   ├── ui/                       # shadcn/ui components
+│   ├── resume-templates/         # Resume templates
+│   ├── resume-sections/          # Resume section components
+│   └── job-tracker/              # Job tracker components
+├── lib/                          # Utilities
+│   ├── supabase.ts               # Supabase client
+│   ├── github-api.ts             # GitHub API helper
+│   └── utils.ts                  # Helper functions
+├── hooks/                        # Custom React hooks
+├── types/                        # TypeScript types
+│   ├── resume.ts                 # Resume types
+│   └── job-board.ts              # Job board types
+├── public/                       # Static assets
+├── middleware.ts                 # Clerk middleware
+├── supabase-migration.sql        # Database schema
+└── package.json                  # Dependencies
 ```
 
-This will automatically install dependencies for the frontend, backend, and root workspace.
+---
 
-### Development
+## 🔌 API Documentation
 
-Run both frontend and backend concurrently:
+### Interactive API Documentation
 
-```bash
-npm run dev
+Visit **[/api-docs](/api-docs)** for interactive Swagger UI documentation where you can:
+- View all API endpoints
+- See request/response schemas
+- Test APIs directly in your browser
+- Get authentication examples
+
+### Authentication
+
+All API routes (except LinkedIn OAuth) require Clerk authentication. Include the Clerk session token in requests.
+
+**Automatic User Sync**: When a user logs in via Clerk (Google OAuth, email, etc.), they are automatically synced to the Supabase database. This happens transparently in the background using the `UserSyncProvider` component.
+
+### Base URL
+
+```
+Development: http://localhost:3000/api
+Production: https://yourdomain.com/api
+Swagger UI: http://localhost:3000/api-docs
 ```
 
-This will start:
-- **Frontend**: http://localhost:3000
-- **Backend**: http://localhost:3001
-- **API Documentation**: http://localhost:3001/api-docs
+### Endpoints
 
-Or run them separately:
+#### **User Management**
 
-```bash
-# Frontend only
-npm run dev:frontend
-
-# Backend only
-npm run dev:backend
+##### Sync User
+```http
+POST /api/users/sync
 ```
 
-### API Documentation
+Sync Clerk user with Supabase database. Call this once after user signs in for the first time.
 
-The backend includes interactive Swagger documentation. Once the backend is running, visit:
+**Request Body:**
+```json
+{
+  "email": "user@example.com"
+}
+```
 
-**Swagger UI**: [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
+**Response:**
+```json
+{
+  "user": {
+    "id": "uuid",
+    "clerk_user_id": "clerk_user_id",
+    "email": "user@example.com",
+    "created_at": "2024-01-01T00:00:00Z"
+  }
+}
+```
 
-Features:
-- Interactive API testing
-- Complete endpoint documentation
-- Request/response examples
-- Schema definitions
+---
+
+#### **Resumes**
+
+##### Get All Resumes
+```http
+GET /api/resumes
+```
+
+Get all resumes for the authenticated user.
+
+**Response:**
+```json
+{
+  "resumes": [
+    {
+      "id": "uuid",
+      "name": "My Resume",
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john@example.com",
+      "positions": [...],
+      "educations": [...],
+      "skills": [...],
+      "config": {...},
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+##### Create Resume
+```http
+POST /api/resumes
+```
+
+**Request Body:**
+```json
+{
+  "name": "My Resume",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john@example.com",
+  "headline": "Software Engineer",
+  "summary": "Experienced developer...",
+  "positions": [
+    {
+      "title": "Senior Developer",
+      "company": "Tech Corp",
+      "startDate": "2020-01",
+      "endDate": "Present",
+      "description": "Led development team..."
+    }
+  ],
+  "educations": [...],
+  "skills": [{ "name": "JavaScript" }],
+  "config": {
+    "showPhoto": true,
+    "showSummary": true,
+    "showExperience": true
+  }
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "resume": { ... }
+}
+```
+
+##### Get Resume by ID
+```http
+GET /api/resumes/:id
+```
+
+##### Update Resume
+```http
+PUT /api/resumes/:id
+```
+
+**Request Body:** Partial resume data (any fields from create)
+
+##### Delete Resume
+```http
+DELETE /api/resumes/:id
+```
+
+Soft delete (sets `is_active` to false).
+
+**Response:**
+```json
+{
+  "success": true
+}
+```
+
+---
+
+#### **Job Boards**
+
+##### Get All Job Boards
+```http
+GET /api/job-boards
+```
+
+Returns all boards with their jobs.
+
+**Response:**
+```json
+{
+  "boards": [
+    {
+      "id": "uuid",
+      "name": "Software Engineering Jobs",
+      "jobs": [
+        {
+          "id": "uuid",
+          "company": "Google",
+          "title": "Software Engineer",
+          "status": "applied",
+          "link": "https://...",
+          "created_at": "2024-01-01T00:00:00Z"
+        }
+      ],
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+##### Create Job Board
+```http
+POST /api/job-boards
+```
+
+**Request Body:**
+```json
+{
+  "name": "Software Engineering Jobs"
+}
+```
+
+---
+
+#### **Jobs**
+
+##### Create Job
+```http
+POST /api/jobs/:id
+```
+
+**Request Body:**
+```json
+{
+  "boardId": "board-uuid",
+  "company": "Google",
+  "title": "Software Engineer",
+  "link": "https://careers.google.com/...",
+  "status": "shortlist",
+  "notes": "Applied via referral"
+}
+```
+
+##### Update Job
+```http
+PUT /api/jobs/:id
+```
+
+##### Delete Job
+```http
+DELETE /api/jobs/:id
+```
+
+---
+
+## 🗄️ Database Schema
+
+### Tables
+
+#### `users`
+- `id` (UUID, PK)
+- `clerk_user_id` (TEXT, UNIQUE) - Synced with Clerk
+- `email` (TEXT)
+- `created_at`, `updated_at` (TIMESTAMPTZ)
+
+#### `resumes`
+- `id` (UUID, PK)
+- `user_id` (UUID, FK → users)
+- `name` (TEXT) - Resume title
+- Personal info: `first_name`, `last_name`, `email`, `headline`, `summary`, `location`, `phone_number`
+- Social: `linkedin_id`, `github_id`
+- Complex data (JSONB): `positions`, `educations`, `skills`, `projects`, `certifications`, `custom_sections`
+- Configuration (JSONB): `config` - visibility toggles
+- Metadata: `template`, `zoom`, `is_active`, `created_at`, `updated_at`
+
+#### `job_boards`
+- `id` (UUID, PK)
+- `user_id` (UUID, FK → users)
+- `name` (TEXT)
+- `is_active` (BOOLEAN)
+- `created_at`, `updated_at` (TIMESTAMPTZ)
+
+#### `jobs`
+- `id` (UUID, PK)
+- `board_id` (UUID, FK → job_boards, CASCADE DELETE)
+- `company`, `title` (TEXT)
+- `link`, `notes` (TEXT, optional)
+- `status` (TEXT) - 'shortlist', 'applied', 'interview', 'offer', 'rejected', or custom
+- `created_at`, `updated_at` (TIMESTAMPTZ)
+
+#### `custom_sections`
+- `id` (UUID, PK)
+- `user_id` (UUID, FK → users)
+- `title` (TEXT) - Custom status name
+- `color` (TEXT) - Tailwind class
+- `is_default` (BOOLEAN)
+- `created_at` (TIMESTAMPTZ)
+
+---
+
+## 🌐 Deployment
+
+### Deploy to Vercel
+
+1. **Push your code to GitHub**
+
+   ```bash
+   git add .
+   git commit -m "Initial commit"
+   git push origin main
+   ```
+
+2. **Import project to Vercel**
+
+   - Go to [vercel.com](https://vercel.com)
+   - Click "Add New" → "Project"
+   - Import your GitHub repository
+   - Vercel will auto-detect Next.js
+
+3. **Configure Environment Variables**
+
+   Add all variables from your `.env` file in the Vercel dashboard:
+   - Project Settings → Environment Variables
+   - Add each variable for Production, Preview, and Development
+
+4. **Deploy**
+
+   Vercel will automatically deploy your app. Each push to `main` triggers a new deployment.
+
+### Environment Variables for Vercel
+
+Make sure to add these in Vercel:
+
+```
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+CLERK_SECRET_KEY
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+NEXT_PUBLIC_LINKEDIN_CLIENT_ID (optional)
+LINKEDIN_CLIENT_SECRET (optional)
+NEXT_PUBLIC_APP_URL
+```
+
+---
+
+## 🛠️ Development
 
 ### Available Scripts
 
-#### Root Level
-
-- `npm run dev` - Run both frontend and backend concurrently
-- `npm run dev:frontend` - Run only the frontend
-- `npm run dev:backend` - Run only the backend
-- `npm run build` - Build both frontend and backend
-- `npm run build:frontend` - Build only the frontend
-- `npm run build:backend` - Build only the backend
-- `npm run start` - Start production backend server
-
-#### Frontend (cd frontend)
-
-- `npm run dev` - Start Next.js development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-
-#### Backend (cd backend)
-
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Compile TypeScript to JavaScript
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-
-## Backend API Endpoints
-
-Base URL: `http://localhost:3001/api`
-
-### Resumes
-
-- `GET /api/resumes` - Get all resumes
-- `GET /api/resumes/:id` - Get a single resume by ID
-- `POST /api/resumes` - Create a new resume
-- `PUT /api/resumes/:id` - Update a resume
-- `DELETE /api/resumes/:id` - Delete a resume
-
-### Health Check
-
-- `GET /health` - API health check endpoint
-
-## Environment Variables
-
-### Backend
-
-Create a `.env` file in the `backend` directory:
-
-```env
-PORT=3001
-NODE_ENV=development
-```
-
-## Building for Production
-
 ```bash
-# Build both frontend and backend
-npm run build
-
-# Start production server
-npm run start
+npm run dev          # Start development server (localhost:3000)
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run analyze      # Analyze bundle size
 ```
 
-## Technology Stack
+### Code Quality
 
-### Frontend
-- Next.js 15
-- React 19
-- TypeScript
-- Tailwind CSS
-- Radix UI
-- Framer Motion
+- **TypeScript**: Strict mode enabled
+- **ESLint**: Next.js recommended config
+- **Prettier**: Integrated with Tailwind
+- **Validation**: Zod schemas for API routes
 
-### Backend
-- Node.js
-- Express
-- TypeScript
-- Swagger/OpenAPI
+---
 
-## License
+## 🤝 Contributing
 
-MIT
+We welcome contributions! Here's how:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m "Add amazing feature"`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+### Guidelines
+
+- Follow the existing code style
+- Write clear commit messages
+- Add tests for new features
+- Update documentation as needed
+- Ensure all tests pass before submitting
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **Next.js** - The React Framework
+- **Clerk** - User authentication
+- **Supabase** - Backend as a Service
+- **Vercel** - Deployment platform
+- **shadcn/ui** - Beautiful UI components
+- **Radix UI** - Accessible components
+- **TailwindCSS** - Utility-first CSS
+
+---
+
+## 📧 Support
+
+- **Issues**: [GitHub Issues](https://github.com/yourusername/simpleresu.me/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/simpleresu.me/discussions)
+- **Email**: support@simpleresu.me
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] PDF Export functionality
+- [ ] Email resume sharing
+- [ ] Resume analytics
+- [ ] AI-powered resume suggestions
+- [ ] Cover letter generator
+- [ ] Mobile app (React Native)
+- [ ] Resume templates marketplace
+- [ ] Interview prep integration
+
+---
+
+Made with ❤️ by the SimpleResu.me team
