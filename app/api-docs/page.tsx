@@ -1,11 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
 
+interface SwaggerSpec {
+  [key: string]: unknown;
+}
+
 export default function ApiDocsPage() {
-  const [spec, setSpec] = useState<any>(null);
+  const [spec, setSpec] = useState<SwaggerSpec | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -52,12 +57,12 @@ export default function ApiDocsPage() {
                 Interactive API documentation and testing interface
               </p>
             </div>
-            <a
+            <Link
               href="/"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               ← Back to App
-            </a>
+            </Link>
           </div>
         </div>
       </div>

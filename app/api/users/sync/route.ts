@@ -51,7 +51,7 @@ import { errorResponse } from '../../lib/errors';
  */
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await requireAuth(request);
+    const authResult = await requireAuth();
     if (authResult instanceof NextResponse) return authResult;
     const { userId } = authResult;
 

@@ -2,28 +2,31 @@
 
 import { ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { SharedHeader } from '@/components/shared-header';
-import { CreateResumeModal } from '@/components/create-resume-modal';
+
+const KEYWORDS = ['Builders', 'Thinkers', 'Developers', 'Hackers', 'Tinkerers'];
 
 export default function LandingPage() {
+  const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [typingText, setTypingText] = useState('');
+  const [currentKeywordIndex, setCurrentKeywordIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const resumeTemplates = [
     {
       title: "Modern Professional",
-      bgColor: "from-zinc-800 to-zinc-900",
-      accentColor: "border-silver-400"
+      image: "/resume1.png"
     },
     {
       title: "Minimalist Tech",
-      bgColor: "from-slate-800 to-slate-900",
-      accentColor: "border-zinc-400"
+      image: "/resume2.png"
     },
     {
       title: "Executive Elite",
-      bgColor: "from-gray-800 to-gray-900",
-      accentColor: "border-slate-400"
+      image: "/resume3.png"
     }
   ];
 
@@ -33,6 +36,39 @@ export default function LandingPage() {
     }, 4000);
     return () => clearInterval(timer);
   }, [resumeTemplates.length]);
+
+  // Typing effect for keywords
+  useEffect(() => {
+    const currentKeyword = KEYWORDS[currentKeywordIndex];
+    let timeout: NodeJS.Timeout;
+
+    if (!isDeleting) {
+      // Typing
+      if (typingText.length < currentKeyword.length) {
+        timeout = setTimeout(() => {
+          setTypingText(currentKeyword.slice(0, typingText.length + 1));
+        }, 100);
+      } else {
+        // Finished typing, wait then start deleting
+        timeout = setTimeout(() => {
+          setIsDeleting(true);
+        }, 2000);
+      }
+    } else {
+      // Deleting
+      if (typingText.length > 0) {
+        timeout = setTimeout(() => {
+          setTypingText(typingText.slice(0, -1));
+        }, 50);
+      } else {
+        // Finished deleting, move to next keyword
+        setIsDeleting(false);
+        setCurrentKeywordIndex((prev) => (prev + 1) % KEYWORDS.length);
+      }
+    }
+
+    return () => clearTimeout(timeout);
+  }, [typingText, currentKeywordIndex, isDeleting]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -48,10 +84,13 @@ export default function LandingPage() {
               <div className="max-w-xl space-y-6 lg:space-y-8 w-full">
                 <div className="space-y-4 lg:space-y-6">
                   <div className="inline-block">
-                    <span className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 text-xs sm:text-sm font-medium">
-                      Professional Resume Builder
-                    </span>
-                  </div>
+                      <span className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 text-xs sm:text-sm font-medium">
+                       Built for : {' '}
+                        <span className="inline-block min-w-[140px] text-left">
+                          <span className="text-orange-600">{typingText}</span>
+                        </span>
+                      </span>
+                    </div>
 
                   <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight">
                     <span className="block text-black mb-1 sm:mb-2">Craft Your</span>
@@ -69,15 +108,11 @@ export default function LandingPage() {
                 {/* CTA Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 lg:pt-4">
                   <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="group px-6 sm:px-8 py-3 sm:py-4 bg-black text-white rounded-lg hover:bg-zinc-800 transition-all duration-200 shadow-lg flex items-center justify-center space-x-2 text-base sm:text-lg font-semibold w-full sm:w-auto"
+                    onClick={() => router.push('/resume-builder')}
+                    className="group relative px-6 sm:px-7 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-lg hover:rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 text-sm sm:text-base font-medium w-full sm:w-auto overflow-hidden transform hover:scale-[1.02] active:scale-100"
                   >
-                    <span>Get Started Free</span>
-                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                  </button>
-
-                  <button className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-black rounded-lg border border-zinc-300 hover:border-black hover:bg-zinc-50 transition-all duration-200 text-base sm:text-lg font-semibold w-full sm:w-auto">
-                    View Templates
+                    <span className="relative z-10">Create Your Resume</span>
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-300 relative z-10" />
                   </button>
                 </div>
 
@@ -109,76 +144,74 @@ export default function LandingPage() {
                 }}></div>
               </div>
 
-              {/* Resume Preview Carousel */}
-              <div className="relative w-full max-w-[280px] sm:max-w-sm md:max-w-md z-10">
-                <div className="relative aspect-[8.5/11] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl shadow-zinc-900/20">
-                  {resumeTemplates.map((template, index) => (
-                    <div
-                      key={index}
-                      className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                        index === currentSlide
-                          ? 'opacity-100 scale-100'
-                          : 'opacity-0 scale-95 pointer-events-none'
-                      }`}
-                    >
-                      {/* Resume Template Preview */}
-                      <div className="w-full h-full bg-white p-4 sm:p-6 md:p-8 border border-zinc-300 shadow-inner">
-                        {/* Header */}
-                        <div className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-zinc-300">
-                          <div className="h-4 sm:h-5 md:h-6 bg-black rounded w-2/3"></div>
-                          <div className="h-2 sm:h-2.5 md:h-3 bg-zinc-300 rounded w-1/2"></div>
-                          <div className="h-2 sm:h-2.5 md:h-3 bg-zinc-300 rounded w-1/3"></div>
-                        </div>
+              {/* 3D Resume Carousel */}
+              <div className="relative w-full max-w-[400px] sm:max-w-md md:max-w-lg lg:max-w-xl z-10" style={{ perspective: '1200px' }}>
+                <div className="relative h-[500px] sm:h-[600px] md:h-[700px]">
+                  {resumeTemplates.map((template, index) => {
+                    // Calculate the relative position from current slide
+                    let position = index - currentSlide;
+                    
+                    // Handle circular wrapping
+                    if (position > resumeTemplates.length / 2) {
+                      position -= resumeTemplates.length;
+                    } else if (position < -resumeTemplates.length / 2) {
+                      position += resumeTemplates.length;
+                    }
 
-                        {/* Content Sections */}
-                        <div className="space-y-4 sm:space-y-5 md:space-y-6">
-                          <div className="space-y-1.5 sm:space-y-2">
-                            <div className="h-3 sm:h-3.5 md:h-4 bg-zinc-700 rounded w-1/4 mb-2 sm:mb-3"></div>
-                            <div className="h-1.5 sm:h-2 bg-zinc-200 rounded w-full"></div>
-                            <div className="h-1.5 sm:h-2 bg-zinc-200 rounded w-5/6"></div>
-                            <div className="h-1.5 sm:h-2 bg-zinc-200 rounded w-4/6"></div>
-                          </div>
+                    // Calculate rotation angle (60 degrees per position)
+                    const rotateY = position * 60;
+                    // Calculate Z translation (depth)
+                    const translateZ = -Math.abs(position) * 150;
+                    // Calculate X translation (horizontal position)
+                    const translateX = position * 120;
+                    // Opacity based on position (center = 1, sides = 0.4)
+                    const opacity = position === 0 ? 1 : 0.4;
+                    // Scale based on position (center = 1, sides = 0.85)
+                    const scale = position === 0 ? 1 : 0.85;
+                    // Z-index to ensure center is on top
+                    const zIndex = position === 0 ? 10 : 5 - Math.abs(position);
 
-                          <div className="space-y-1.5 sm:space-y-2">
-                            <div className="h-3 sm:h-3.5 md:h-4 bg-zinc-700 rounded w-1/3 mb-2 sm:mb-3"></div>
-                            <div className="h-1.5 sm:h-2 bg-zinc-200 rounded w-full"></div>
-                            <div className="h-1.5 sm:h-2 bg-zinc-200 rounded w-4/5"></div>
-                            <div className="h-1.5 sm:h-2 bg-zinc-200 rounded w-3/4"></div>
-                          </div>
-
-                          <div className="space-y-1.5 sm:space-y-2">
-                            <div className="h-3 sm:h-3.5 md:h-4 bg-zinc-700 rounded w-1/4 mb-2 sm:mb-3"></div>
-                            <div className="flex gap-1.5 sm:gap-2">
-                              <div className="h-4 sm:h-5 md:h-6 bg-zinc-300 rounded px-2 sm:px-3 w-14 sm:w-16 md:w-20"></div>
-                              <div className="h-4 sm:h-5 md:h-6 bg-zinc-300 rounded px-2 sm:px-3 w-14 sm:w-16 md:w-20"></div>
-                              <div className="h-4 sm:h-5 md:h-6 bg-zinc-300 rounded px-2 sm:px-3 w-14 sm:w-16 md:w-20"></div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Template Label */}
-                        <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-4 sm:left-6 md:left-8 right-4 sm:right-6 md:right-8">
-                          <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 border border-zinc-300 shadow-sm">
-                            <p className="text-zinc-700 text-xs sm:text-sm font-medium">{template.title}</p>
-                          </div>
+                    return (
+                      <div
+                        key={index}
+                        className="absolute inset-0 transition-all duration-700 ease-in-out"
+                        style={{
+                          transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${rotateY}deg) scale(${scale})`,
+                          opacity: opacity,
+                          zIndex: zIndex,
+                          transformStyle: 'preserve-3d',
+                          pointerEvents: position === 0 ? 'auto' : 'none',
+                        }}
+                      >
+                        {/* Resume Image */}
+                        <div className="relative w-full h-full" style={{ borderRadius: '5%' }}>
+                          <Image
+                            src={template.image}
+                            alt={template.title}
+                            fill
+                            className="object-contain"
+                            style={{ borderRadius: '5%' }}
+                            priority={index === 0}
+                            sizes="(max-width: 640px) 400px, (max-width: 768px) 448px, (max-width: 1024px) 512px, 640px"
+                          />
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Carousel Indicators */}
-                <div className="flex justify-center gap-1.5 sm:gap-2 mt-6 sm:mt-8">
+                <div className="flex justify-center gap-1.5 sm:gap-2 mt-8 sm:mt-10">
                   {resumeTemplates.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentSlide(index)}
-                      className={`h-1 sm:h-1.5 rounded-full transition-all duration-300 ${
+                      className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
                         index === currentSlide
-                          ? 'w-6 sm:w-8 bg-black'
-                          : 'w-1 sm:w-1.5 bg-zinc-300 hover:bg-zinc-400'
+                          ? 'w-8 sm:w-10 bg-black'
+                          : 'w-2 sm:w-2.5 bg-zinc-300 hover:bg-zinc-400'
                       }`}
-                      aria-label={`View ${resumeTemplates[index].title}`}
+                      aria-label={`View resume ${index + 1}`}
                     />
                   ))}
                 </div>
@@ -191,14 +224,29 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-zinc-200 py-6 sm:py-8 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-zinc-500 text-xs sm:text-sm">
-            Built with Next.js, Clerk, and Supabase
-          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm text-zinc-500">
+            <a
+              href="https://www.linkedin.com/in/siddhucse/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black transition-colors"
+            >
+              LinkedIn
+            </a>
+            <span>|</span>
+            <a
+              href="https://github.com/vydyas/simpleresu.me"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-black transition-colors"
+            >
+              GitHub
+            </a>
+            <span>|</span>
+            <span>Made with ❤️ in India</span>
+          </div>
         </div>
       </footer>
-
-      {/* Create Resume Modal */}
-      <CreateResumeModal open={showCreateModal} onOpenChange={setShowCreateModal} />
     </div>
   );
 }

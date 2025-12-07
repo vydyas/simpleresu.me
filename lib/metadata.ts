@@ -2,25 +2,35 @@ import { Metadata } from 'next';
 
 const defaultMetadata: Metadata = {
   title: {
-    default: 'Build Job-Winning Resumes for the Tech Industry | SimpleResume',
-    template: '%s | SimpleResume'
+    default: 'Free Resume Maker | Online Resume Builder | SimpleResu.me',
+    template: '%s | SimpleResu.me'
   },
-  description: 'Create professional resumes tailored for the tech industry, including FAANG and MAANG companies. Stand out with SimpleResume’s modern templates and AI assistance.',
+  description: 'Create professional resumes for free with SimpleResu.me - the best online resume builder. Build ATS-friendly resumes with modern templates. Free resume maker for builders, thinkers, developers, hackers, and tinkerers.',
   keywords: [
-    'resume builder',
-    'tech industry resumes',
-    'FAANG resumes',
-    'MAANG resumes',
-    'professional resume',
-    'job application',
-    'career tools',
+    'free resume maker',
+    'online resume builder',
+    'resume builder free',
+    'create resume online',
+    'professional resume builder',
+    'ATS resume builder',
     'resume templates',
-    'online resume',
-    'free resume builder'
+    'free resume templates',
+    'resume maker online',
+    'build resume free',
+    'simple resume builder',
+    'resume creator',
+    'free CV maker',
+    'online CV builder',
+    'resume builder for developers',
+    'tech resume builder',
+    'modern resume templates',
+    'ATS friendly resume',
+    'job application resume',
+    'career tools'
   ],
-  authors: [{ name: 'SimpleResume' }],
-  creator: 'SimpleResume',
-  publisher: 'SimpleResume',
+  authors: [{ name: 'SimpleResu.me' }],
+  creator: 'SimpleResu.me',
+  publisher: 'SimpleResu.me',
   robots: {
     index: true,
     follow: true,
@@ -29,9 +39,9 @@ const defaultMetadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://simpleresu.me',
-    siteName: 'SimpleResume',
-    title: 'Build Job-Winning Resumes for the Tech Industry | SimpleResume',
-    description: 'Create professional resumes tailored for the tech industry, including FAANG and MAANG companies.',
+    siteName: 'SimpleResu.me',
+    title: 'Free Resume Maker | Online Resume Builder | SimpleResu.me',
+    description: 'Create professional resumes for free with SimpleResu.me - the best online resume builder. Build ATS-friendly resumes with modern templates.',
     images: [
       {
         url: 'https://simpleresu.me/og-image.png',
@@ -43,8 +53,8 @@ const defaultMetadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Build Job-Winning Resumes for the Tech Industry | SimpleResume',
-    description: 'Create professional resumes tailored for the tech industry, including FAANG and MAANG companies.',
+    title: 'Free Resume Maker | Online Resume Builder | SimpleResu.me',
+    description: 'Create professional resumes for free with SimpleResu.me - the best online resume builder. Build ATS-friendly resumes with modern templates.',
     images: ['https://simpleresu.me/twitter-image.png'],
     creator: '@simpleresu_me',
   },

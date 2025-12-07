@@ -9,9 +9,7 @@ export interface AuthenticatedRequest extends NextRequest {
  * Require authentication for an API route
  * Returns userId if authenticated, or error response if not
  */
-export async function requireAuth(
-  request: NextRequest
-): Promise<{ userId: string } | NextResponse> {
+export async function requireAuth(): Promise<{ userId: string } | NextResponse> {
   const { userId } = await auth();
 
   if (!userId) {

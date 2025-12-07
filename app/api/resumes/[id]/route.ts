@@ -45,11 +45,12 @@ import { updateResumeSchema } from '../../lib/validation';
  *               $ref: '#/components/schemas/Error'
  */
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = await requireAuth(request);
+    const { id } = await params;
+    const authResult = await requireAuth();
     if (authResult instanceof NextResponse) return authResult;
     const { userId } = authResult;
 
@@ -67,7 +68,7 @@ export async function GET(
     const { data, error } = await supabaseAdmin
       .from('resumes')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .eq('is_active', true)
       .single();
@@ -197,10 +198,11 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = await requireAuth(request);
+    const { id } = await params;
+    const authResult = await requireAuth();
     if (authResult instanceof NextResponse) return authResult;
     const { userId } = authResult;
 
@@ -218,7 +220,7 @@ export async function PUT(
       throw new ApiError(404, 'User not found');
     }
 
-    const updatePayload: any = {};
+    const updatePayload: Record<string, unknown> = {};
 
     // Map validated data to database columns
     if (validatedData.name !== undefined) updatePayload.name = validatedData.name;
@@ -258,7 +260,7 @@ export async function PUT(
     const { data, error } = await supabaseAdmin
       .from('resumes')
       .update(updatePayload)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .eq('is_active', true)
       .select()
@@ -315,11 +317,12 @@ export async function PUT(
  *               $ref: '#/components/schemas/Error'
  */
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const authResult = await requireAuth(request);
+    const { id } = await params;
+    const authResult = await requireAuth();
     if (authResult instanceof NextResponse) return authResult;
     const { userId } = authResult;
 
@@ -337,7 +340,7 @@ export async function DELETE(
     const { error } = await supabaseAdmin
       .from('resumes')
       .update({ is_active: false })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', user.id)
       .eq('is_active', true);
 
