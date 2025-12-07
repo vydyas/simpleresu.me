@@ -71,35 +71,42 @@ export default function LandingPage() {
   }, [typingText, currentKeywordIndex, isDeleting]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-white via-emerald-50/20 to-teal-50/30 relative overflow-hidden">
+      {/* Unified background gradient overlays */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-200/20 to-teal-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-cyan-200/20 to-teal-200/20 rounded-full blur-3xl"></div>
+      </div>
+      
       {/* Navigation */}
       <SharedHeader variant="landing" />
 
       {/* Hero Section - Split Layout */}
-      <main className="min-h-[calc(100vh-4rem)] flex items-center py-8 lg:py-0">
+      <main className="min-h-[calc(100vh-4rem)] flex items-center py-8 lg:py-0 relative z-10">
         <div className="w-full">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-0 min-h-[calc(100vh-4rem)]">
             {/* Left Side - Tagline */}
-            <div className="flex items-center justify-center px-4 sm:px-8 lg:px-16 bg-white order-2 lg:order-1">
-              <div className="max-w-xl space-y-6 lg:space-y-8 w-full">
+            <div className="flex items-center justify-center px-4 sm:px-8 lg:px-16 order-2 lg:order-1 relative">
+              
+              <div className="max-w-xl space-y-6 lg:space-y-8 w-full relative z-10">
                 <div className="space-y-4 lg:space-y-6">
                   <div className="inline-block">
-                      <span className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 text-xs sm:text-sm font-medium">
+                      <span className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/50 text-zinc-700 text-xs sm:text-sm font-medium shadow-sm">
                        Built for : {' '}
                         <span className="inline-block min-w-[140px] text-left">
-                          <span className="text-orange-600">{typingText}</span>
+                          <span className="text-emerald-600 font-semibold">{typingText}</span>
                         </span>
                       </span>
                     </div>
 
                   <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight">
-                    <span className="block text-black mb-1 sm:mb-2">Craft Your</span>
-                    <span className="block bg-gradient-to-r from-zinc-700 via-zinc-500 to-zinc-400 bg-clip-text text-transparent">
+                    <span className="block text-gray-900 mb-1 sm:mb-2">Craft Your</span>
+                    <span className="block bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-clip-text text-transparent">
                       Perfect Resume
                     </span>
                   </h1>
 
-                  <p className="text-base sm:text-lg lg:text-xl text-zinc-600 leading-relaxed">
+                  <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed">
                     Stand out from the crowd with professionally designed resumes.
                     Built for developers, designers, and tech professionals.
                   </p>
@@ -109,37 +116,64 @@ export default function LandingPage() {
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2 lg:pt-4">
                   <button
                     onClick={() => router.push('/resume-builder')}
-                    className="group relative px-6 sm:px-7 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-lg hover:rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 text-sm sm:text-base font-medium w-full sm:w-auto overflow-hidden transform hover:scale-[1.02] active:scale-100"
+                    className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white rounded-lg hover:rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-emerald-500/40 flex items-center justify-center space-x-2 text-sm sm:text-base font-semibold w-full sm:w-auto overflow-hidden transform hover:scale-[1.02] active:scale-100"
                   >
                     <span className="relative z-10">Create Your Resume</span>
                     <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-300 relative z-10" />
                   </button>
+                  
+                  <button
+                    onClick={() => router.push('/resume-score')}
+                    className="px-6 sm:px-8 py-3 sm:py-4 bg-white text-gray-900 rounded-lg border-2 border-gray-200 hover:border-emerald-300 transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center text-sm sm:text-base font-semibold w-full sm:w-auto"
+                  >
+                    Get Your Resume Score
+                  </button>
+                </div>
+
+                {/* Social Proof */}
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-4">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <svg key={i} className="w-4 h-4 text-emerald-500 fill-current" viewBox="0 0 20 20">
+                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                        </svg>
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-600 font-medium">4.9/5</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span className="text-sm font-medium">5K+ users landed interviews</span>
+                  </div>
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-3 gap-4 sm:gap-6 pt-6 lg:pt-8 border-t border-zinc-200">
+                <div className="grid grid-cols-3 gap-4 sm:gap-6 pt-6 lg:pt-8 border-t border-emerald-100">
                   <div>
-                    <div className="text-2xl sm:text-3xl font-bold text-black">10+</div>
-                    <div className="text-xs sm:text-sm text-zinc-500">Templates</div>
+                    <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">10+</div>
+                    <div className="text-xs sm:text-sm text-gray-500">Templates</div>
                   </div>
                   <div>
-                    <div className="text-2xl sm:text-3xl font-bold text-black">5K+</div>
-                    <div className="text-xs sm:text-sm text-zinc-500">Users</div>
+                    <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">5K+</div>
+                    <div className="text-xs sm:text-sm text-gray-500">Users</div>
                   </div>
                   <div>
-                    <div className="text-2xl sm:text-3xl font-bold text-black">ATS</div>
-                    <div className="text-xs sm:text-sm text-zinc-500">Optimized</div>
+                    <div className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">ATS</div>
+                    <div className="text-xs sm:text-sm text-gray-500">Optimized</div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Right Side - Resume Carousel */}
-            <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 from-zinc-50 via-zinc-100 to-zinc-50 relative overflow-hidden order-1 lg:order-2 py-8 lg:py-0">
+            <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 relative overflow-hidden order-1 lg:order-2 py-8 lg:py-0">
               {/* Subtle background pattern */}
-              <div className="absolute inset-0 opacity-30">
+              <div className="absolute inset-0 opacity-20">
                 <div className="absolute inset-0" style={{
-                  backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(0 0 0 / 0.05) 1px, transparent 0)',
+                  backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(16 185 129 / 0.1) 1px, transparent 0)',
                   backgroundSize: '40px 40px'
                 }}></div>
               </div>
@@ -208,8 +242,8 @@ export default function LandingPage() {
                       onClick={() => setCurrentSlide(index)}
                       className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
                         index === currentSlide
-                          ? 'w-8 sm:w-10 bg-black'
-                          : 'w-2 sm:w-2.5 bg-zinc-300 hover:bg-zinc-400'
+                          ? 'w-8 sm:w-10 bg-gradient-to-r from-emerald-500 to-teal-500'
+                          : 'w-2 sm:w-2.5 bg-emerald-200 hover:bg-emerald-300'
                       }`}
                       aria-label={`View resume ${index + 1}`}
                     />

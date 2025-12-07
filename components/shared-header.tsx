@@ -14,7 +14,7 @@ export function SharedHeader({}: SharedHeaderProps) {
 
   return (
     <>
-      <nav className="w-full bg-white border-b border-zinc-200 z-50 print:hidden">
+      <nav className="w-full bg-gradient-to-r from-white via-emerald-50/30 to-white border-b border-emerald-100/50 z-50 print:hidden">
         <div className="max-w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-2 hover:opacity-90 transition-opacity">

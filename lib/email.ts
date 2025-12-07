@@ -150,3 +150,4 @@ function getWelcomeEmailTemplate(name: string): string {
   `.trim();
 }
 
+
