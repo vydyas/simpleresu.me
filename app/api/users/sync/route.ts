@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '../../lib/auth';
 import { supabaseAdmin } from '../../lib/supabase-server';
 import { errorResponse } from '../../lib/errors';
+import { sendWelcomeEmail } from '@/lib/email';
 
 /**
  * @openapi
@@ -68,6 +69,15 @@ export async function POST(request: NextRequest) {
 
     console.log(`[User Sync] Syncing user: ${userId} with email: ${email}`);
 
+    // Check if user already exists
+    const { data: existingUser } = await supabaseAdmin
+      .from('users')
+      .select('id, created_at')
+      .eq('clerk_user_id', userId)
+      .single();
+
+    const isFirstTime = !existingUser;
+
     // Upsert user (insert if not exists, update if exists)
     const { data, error } = await supabaseAdmin
       .from('users')
@@ -88,6 +98,16 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('[User Sync] Supabase error:', error);
       throw error;
+    }
+
+    // Send welcome email for first-time users
+    if (isFirstTime) {
+      console.log(`[User Sync] First-time user detected, sending welcome email to ${email}`);
+      // Send email asynchronously (don't wait for it)
+      sendWelcomeEmail({ email }).catch((err) => {
+        console.error('[User Sync] Failed to send welcome email:', err);
+        // Don't fail the sync if email fails
+      });
     }
 
     console.log(`[User Sync] Successfully synced user: ${userId}`);
