@@ -135,7 +135,7 @@ export default function LandingPage() {
             </div>
 
             {/* Right Side - Resume Carousel */}
-            <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-zinc-50 via-zinc-100 to-zinc-50 relative overflow-hidden order-1 lg:order-2 py-8 lg:py-0">
+            <div className="flex items-center justify-center px-4 sm:px-6 lg:px-8 from-zinc-50 via-zinc-100 to-zinc-50 relative overflow-hidden order-1 lg:order-2 py-8 lg:py-0">
               {/* Subtle background pattern */}
               <div className="absolute inset-0 opacity-30">
                 <div className="absolute inset-0" style={{
