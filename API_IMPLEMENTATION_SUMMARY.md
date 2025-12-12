@@ -5,7 +5,7 @@ This document summarizes the Next.js API routes implementation for SimpleResu.me
 ## ✅ What Was Implemented
 
 ### 1. Database Schema (`supabase-migration.sql`)
-- **5 tables**: users, resumes, job_boards, jobs, custom_sections
+- **2 tables**: users, resumes
 - **JSONB fields** for flexible data storage (positions, educations, skills, etc.)
 - **Indexes** for performance optimization
 - **Triggers** for automatic timestamp updates
@@ -31,7 +31,6 @@ This document summarizes the Next.js API routes implementation for SimpleResu.me
 #### `validation.ts`
 - **Zod schemas** for all data models
 - Resume validation: positions, educations, skills, projects, certifications
-- Job tracker validation: boards, jobs, custom sections
 - Request body validation before database operations
 
 ### 3. API Routes Implemented
@@ -46,19 +45,11 @@ This document summarizes the Next.js API routes implementation for SimpleResu.me
 - `PUT /api/resumes/[id]` - Update resume
 - `DELETE /api/resumes/[id]` - Soft delete resume
 
-#### Job Tracker
-- `GET /api/job-boards` - List boards with jobs
-- `POST /api/job-boards` - Create board
-- `POST /api/jobs/[id]` - Create job in board
-- `PUT /api/jobs/[id]` - Update job
-- `DELETE /api/jobs/[id]` - Delete job
-
 ### 4. Interactive API Documentation (`/api-docs`)
 - **Swagger UI** at `/api-docs` with interactive API testing
 - **OpenAPI 3.0** specification with complete schemas
 - **JSDoc annotations** on all API routes (auto-generated)
 - **Authentication instructions** for testing with Clerk tokens
-- Excludes job board and jobs routes per requirements
 
 Files:
 - [lib/swagger.ts](lib/swagger.ts) - OpenAPI configuration
@@ -101,13 +92,8 @@ app/
 │   │   │   └── route.ts               # LinkedIn OAuth token exchange
 │   │   └── getProfile/
 │   │       └── route.ts               # Fetch LinkedIn profile data
-│   ├── swagger/
-│   │   └── route.ts                   # OpenAPI spec generation endpoint
-│   ├── job-boards/
-│   │   └── route.ts                   # List & create boards
-│   └── jobs/
-│       └── [id]/
-│           └── route.ts               # Create, update, delete jobs
+│   └── swagger/
+│       └── route.ts                   # OpenAPI spec generation endpoint
 ├── api-docs/
 │   └── page.tsx                       # Swagger UI page
 └── lib/
@@ -248,7 +234,7 @@ console.log('Created resume:', resume.id);
 
 - **Row Level Security (RLS)**: Currently disabled in favor of API-layer authentication for simpler implementation. Can be enabled later for additional security.
 
-- **Soft Deletes**: Resumes and job boards use `is_active` flag instead of hard deletes to allow recovery.
+- **Soft Deletes**: Resumes use `is_active` flag instead of hard deletes to allow recovery.
 
 - **JSONB Storage**: Complex nested data (positions, educations, etc.) stored as JSONB for flexibility without schema migrations.
 

@@ -80,29 +80,3 @@ export const createResumeSchema = z.object({
 });
 
 export const updateResumeSchema = createResumeSchema.partial();
-
-// Job tracker validation schemas
-export const createJobBoardSchema = z.object({
-  name: z.string().min(1, 'Board name is required'),
-});
-
-export const updateJobBoardSchema = z.object({
-  name: z.string().min(1).optional(),
-  isActive: z.boolean().optional(),
-});
-
-export const createJobSchema = z.object({
-  company: z.string().min(1, 'Company name is required'),
-  title: z.string().min(1, 'Job title is required'),
-  link: z.string().url().optional().or(z.literal('')),
-  status: z.string().min(1),
-  notes: z.string().optional(),
-});
-
-export const updateJobSchema = createJobSchema.partial();
-
-export const createCustomSectionSchema = z.object({
-  title: z.string().min(1, 'Section title is required'),
-  color: z.string().optional(),
-  isDefault: z.boolean().optional(),
-});

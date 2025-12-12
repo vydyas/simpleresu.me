@@ -4,7 +4,8 @@
  */
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = process.env.FROM_EMAIL || 'SimpleResu.me <welcome@simpleresu.me>';
+const FROM_EMAIL =
+  process.env.FROM_EMAIL || "SimpleResu.me <welcome@simpleresu.me>";
 
 interface WelcomeEmailData {
   email: string;
@@ -14,37 +15,40 @@ interface WelcomeEmailData {
 /**
  * Send welcome email to new users
  */
-export async function sendWelcomeEmail({ email, name }: WelcomeEmailData): Promise<boolean> {
+export async function sendWelcomeEmail({
+  email,
+  name,
+}: WelcomeEmailData): Promise<boolean> {
   if (!RESEND_API_KEY) {
-    console.warn('[Email] RESEND_API_KEY not configured, skipping email send');
+    console.warn("[Email] RESEND_API_KEY not configured, skipping email send");
     return false;
   }
 
   try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
         from: FROM_EMAIL,
         to: email,
-        subject: 'Welcome to SimpleResu.me! 🎉',
-        html: getWelcomeEmailTemplate(name || 'there'),
+        subject: "Welcome to SimpleResu.me! 🎉",
+        html: getWelcomeEmailTemplate(name || "there"),
       }),
     });
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('[Email] Failed to send welcome email:', error);
+      console.error("[Email] Failed to send welcome email:", error);
       return false;
     }
 
     console.log(`[Email] Welcome email sent to ${email}`);
     return true;
   } catch (error) {
-    console.error('[Email] Error sending welcome email:', error);
+    console.error("[Email] Error sending welcome email:", error);
     return false;
   }
 }
@@ -134,7 +138,7 @@ function getWelcomeEmailTemplate(name: string): string {
               <p style="margin: 0 0 15px 0; color: #6b6b6b; font-size: 12px;">
                 <a href="https://www.linkedin.com/in/siddhucse/" style="color: #667eea; text-decoration: none; margin: 0 10px;">LinkedIn</a>
                 <span style="color: #ccc;">|</span>
-                <a href="https://github.com/vydyas/simpleresu.me" style="color: #667eea; text-decoration: none; margin: 0 10px;">GitHub</a>
+                <a href="https://github.com/vydyas/Free-Resume-Builder-Simple-Resume" style="color: #667eea; text-decoration: none; margin: 0 10px;">GitHub</a>
               </p>
               <p style="margin: 0; color: #9b9b9b; font-size: 11px;">
                 © ${new Date().getFullYear()} SimpleResu.me. All rights reserved.
@@ -149,5 +153,6 @@ function getWelcomeEmailTemplate(name: string): string {
 </html>
   `.trim();
 }
+
 
 

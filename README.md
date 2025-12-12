@@ -12,7 +12,6 @@ Generate professional resumes effortlessly using data from LinkedIn and GitHub. 
 - 🔗 **LinkedIn Integration**: Import your professional profile automatically
 - 💻 **GitHub Integration**: Showcase your repositories and contributions
 - 🎨 **Multiple Templates**: Choose from various professional resume designs
-- 📊 **Job Tracker**: Organize your job applications with a Kanban-style board
 - 🔐 **Secure Authentication**: Powered by Clerk for seamless login (Google OAuth, Email, etc.)
 - ⚡ **Automatic User Sync**: Users automatically synced to database on first login
 - ☁️ **Cloud Storage**: All your data safely stored in Supabase
@@ -95,9 +94,6 @@ Generate professional resumes effortlessly using data from LinkedIn and GitHub. 
    This will create all necessary tables:
    - `users` - User profiles synced with Clerk
    - `resumes` - Resume data with JSONB fields
-   - `job_boards` - Job application boards
-   - `jobs` - Individual job applications
-   - `custom_sections` - Custom job status columns
 
 5. **Run the development server**
 
@@ -122,26 +118,21 @@ simpleresu.me/
 │   │   │   └── validation.ts     # Zod schemas
 │   │   ├── users/sync/           # User sync endpoint
 │   │   ├── resumes/              # Resume CRUD endpoints
-│   │   ├── job-boards/           # Job board endpoints
-│   │   ├── jobs/                 # Job CRUD endpoints
 │   │   └── linkedin/             # LinkedIn OAuth handlers
 │   ├── resume-builder/           # Resume builder page
-│   ├── job-tracker/              # Job tracker page
 │   ├── sign-in/                  # Auth pages
 │   └── layout.tsx                # Root layout
 ├── components/                   # React components
 │   ├── ui/                       # shadcn/ui components
 │   ├── resume-templates/         # Resume templates
-│   ├── resume-sections/          # Resume section components
-│   └── job-tracker/              # Job tracker components
+│   └── resume-sections/          # Resume section components
 ├── lib/                          # Utilities
 │   ├── supabase.ts               # Supabase client
 │   ├── github-api.ts             # GitHub API helper
 │   └── utils.ts                  # Helper functions
 ├── hooks/                        # Custom React hooks
 ├── types/                        # TypeScript types
-│   ├── resume.ts                 # Resume types
-│   └── job-board.ts              # Job board types
+│   └── resume.ts                 # Resume types
 ├── public/                       # Static assets
 ├── middleware.ts                 # Clerk middleware
 ├── supabase-migration.sql        # Database schema
@@ -303,83 +294,6 @@ Soft delete (sets `is_active` to false).
 
 ---
 
-#### **Job Boards**
-
-##### Get All Job Boards
-```http
-GET /api/job-boards
-```
-
-Returns all boards with their jobs.
-
-**Response:**
-```json
-{
-  "boards": [
-    {
-      "id": "uuid",
-      "name": "Software Engineering Jobs",
-      "jobs": [
-        {
-          "id": "uuid",
-          "company": "Google",
-          "title": "Software Engineer",
-          "status": "applied",
-          "link": "https://...",
-          "created_at": "2024-01-01T00:00:00Z"
-        }
-      ],
-      "created_at": "2024-01-01T00:00:00Z"
-    }
-  ]
-}
-```
-
-##### Create Job Board
-```http
-POST /api/job-boards
-```
-
-**Request Body:**
-```json
-{
-  "name": "Software Engineering Jobs"
-}
-```
-
----
-
-#### **Jobs**
-
-##### Create Job
-```http
-POST /api/jobs/:id
-```
-
-**Request Body:**
-```json
-{
-  "boardId": "board-uuid",
-  "company": "Google",
-  "title": "Software Engineer",
-  "link": "https://careers.google.com/...",
-  "status": "shortlist",
-  "notes": "Applied via referral"
-}
-```
-
-##### Update Job
-```http
-PUT /api/jobs/:id
-```
-
-##### Delete Job
-```http
-DELETE /api/jobs/:id
-```
-
----
-
 ## 🗄️ Database Schema
 
 ### Tables
@@ -399,23 +313,6 @@ DELETE /api/jobs/:id
 - Complex data (JSONB): `positions`, `educations`, `skills`, `projects`, `certifications`, `custom_sections`
 - Configuration (JSONB): `config` - visibility toggles
 - Metadata: `template`, `zoom`, `is_active`, `created_at`, `updated_at`
-
-#### `job_boards`
-- `id` (UUID, PK)
-- `user_id` (UUID, FK → users)
-- `name` (TEXT)
-- `is_active` (BOOLEAN)
-- `created_at`, `updated_at` (TIMESTAMPTZ)
-
-#### `jobs`
-- `id` (UUID, PK)
-- `board_id` (UUID, FK → job_boards, CASCADE DELETE)
-- `company`, `title` (TEXT)
-- `link`, `notes` (TEXT, optional)
-- `status` (TEXT) - 'shortlist', 'applied', 'interview', 'offer', 'rejected', or custom
-- `created_at`, `updated_at` (TIMESTAMPTZ)
-
-#### `custom_sections`
 - `id` (UUID, PK)
 - `user_id` (UUID, FK → users)
 - `title` (TEXT) - Custom status name
