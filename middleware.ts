@@ -8,6 +8,7 @@ const isPublicRoute = createRouteMatcher([
   "/resume-builder",
   "/blog",
   "/blog/:slug",
+  "/admin(.*)", // Admin routes have their own authentication
 ]);
 
 export default clerkMiddleware(async (auth, request) => {

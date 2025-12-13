@@ -28,6 +28,20 @@ const nextConfig = {
       '@dnd-kit/sortable'
     ],
   },
+  // Disable service worker caching for API routes
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, max-age=0',
+          },
+        ],
+      },
+    ];
+  },
   webpack: (config, { dev, isServer }) => {
     if (!dev && !isServer) {
       config.resolve.alias = {

@@ -7,6 +7,10 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_EMAIL =
   process.env.FROM_EMAIL || "SimpleResu.me <welcome@simpleresu.me>";
 
+if (!RESEND_API_KEY) {
+  console.warn("[Email] RESEND_API_KEY not configured in environment variables");
+}
+
 interface WelcomeEmailData {
   email: string;
   name?: string;
@@ -118,7 +122,7 @@ function getWelcomeEmailTemplate(name: string): string {
                   <li style="margin-bottom: 10px;">🎨 Choose from multiple beautiful templates</li>
                   <li style="margin-bottom: 10px;">📄 Export to PDF with one click</li>
                   <li style="margin-bottom: 10px;">🔗 Import data from LinkedIn</li>
-                  <li style="margin-bottom: 0;">💼 Track your job applications</li>
+                  <li style="margin-bottom: 0;">📝 Blog with expert resume tips</li>
                 </ul>
               </div>
               
@@ -152,6 +156,61 @@ function getWelcomeEmailTemplate(name: string): string {
 </body>
 </html>
   `.trim();
+}
+
+/**
+ * Send custom email to a user
+ */
+export async function sendCustomEmail({
+  to,
+  subject,
+  html,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+}): Promise<{ success: boolean; error?: string }> {
+  if (!RESEND_API_KEY) {
+    return {
+      success: false,
+      error: "RESEND_API_KEY not configured",
+    };
+  }
+
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to,
+        subject,
+        html,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error("[Email] Failed to send custom email:", error);
+      return {
+        success: false,
+        error: error || "Failed to send email",
+      };
+    }
+
+    await response.json();
+    console.log(`[Email] Custom email sent to ${to}`);
+    return { success: true };
+  } catch (error) {
+    console.error("[Email] Error sending custom email:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
 }
 
 
