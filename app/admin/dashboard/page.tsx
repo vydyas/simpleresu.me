@@ -5,9 +5,9 @@ import {
   Users,
   Mail,
   Calendar,
-  Loader2,
   TrendingUp,
 } from "lucide-react";
+import { DashboardShimmer } from "@/components/admin/dashboard-shimmer";
 
 interface User {
   id: string;
@@ -20,6 +20,7 @@ interface User {
 export default function AdminDashboardPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -27,21 +28,26 @@ export default function AdminDashboardPage() {
 
   const fetchUsers = async () => {
     try {
+      setError(null);
+      // Use default caching (Next.js will handle it)
       const response = await fetch("/api/admin/users", {
         method: "GET",
-        cache: "no-store",
-        headers: {
-          "Cache-Control": "no-cache",
-        },
+        next: { revalidate: 30 }, // Revalidate every 30 seconds
       });
       if (response.ok) {
         const data = await response.json();
         setUsers(data.users || []);
       } else {
-        console.error("Failed to fetch users");
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        console.error("Failed to fetch users:", response.status, errorData);
+        setError(errorData.error || errorData.details || "Failed to fetch users");
+        // Set empty array to prevent page break
+        setUsers([]);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
+      setError(error instanceof Error ? error.message : "Failed to fetch users");
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -50,11 +56,7 @@ export default function AdminDashboardPage() {
 
 
   if (loading) {
-    return (
-      <div className="flex-1 p-8 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    );
+    return <DashboardShimmer />;
   }
 
   return (
@@ -66,6 +68,18 @@ export default function AdminDashboardPage() {
           Overview of your admin panel
         </p>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-700">
+            <strong>Error:</strong> {error}
+          </p>
+          <p className="text-xs text-red-600 mt-1">
+            Please check your Supabase configuration and ensure the users table exists.
+          </p>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

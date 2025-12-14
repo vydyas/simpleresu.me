@@ -43,7 +43,9 @@ export default function AdminLayout({
 
   useEffect(() => {
     setMounted(true);
-    
+  }, []);
+
+  useEffect(() => {
     // Skip auth check for login page
     if (pathname === "/admin/login") {
       setIsChecking(false);
@@ -51,19 +53,23 @@ export default function AdminLayout({
       return;
     }
 
-    // Check admin authentication immediately
-    const authenticated = checkAuth();
+    // Small delay to ensure sessionStorage is set after login
+    const timer = setTimeout(() => {
+      // Check admin authentication
+      const authenticated = checkAuth();
 
-    if (!authenticated) {
-      setIsAuthenticated(false);
+      if (!authenticated) {
+        setIsAuthenticated(false);
+        setIsChecking(false);
+        router.replace("/admin/login");
+        return;
+      }
+
+      setIsAuthenticated(true);
       setIsChecking(false);
-      // Use replace to prevent back button navigation
-      router.replace("/admin/login");
-      return;
-    }
+    }, 0);
 
-    setIsAuthenticated(true);
-    setIsChecking(false);
+    return () => clearTimeout(timer);
   }, [pathname, router]);
 
   // Don't show sidebar on login page
@@ -80,11 +86,8 @@ export default function AdminLayout({
     );
   }
 
-  // Double-check authentication before rendering
-  // This prevents any flash of content if session was cleared
-  if (!isAuthenticated || !checkAuth()) {
-    // Redirect immediately if not authenticated
-    router.replace("/admin/login");
+  // Show loading if not authenticated (redirect is handled in useEffect)
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-gray-500">Redirecting to login...</div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Search } from "lucide-react";
+import { Search } from "lucide-react";
+import { UsersShimmer } from "@/components/admin/users-shimmer";
 
 interface User {
   id: string;
@@ -22,12 +23,10 @@ export default function AdminUsersPage() {
 
   const fetchUsers = async () => {
     try {
+      // Use cached data with revalidation
       const response = await fetch("/api/admin/users", {
         method: "GET",
-        cache: "no-store",
-        headers: {
-          "Cache-Control": "no-cache",
-        },
+        next: { revalidate: 30 }, // Revalidate every 30 seconds
       });
       if (response.ok) {
         const data = await response.json();
@@ -47,11 +46,7 @@ export default function AdminUsersPage() {
   );
 
   if (loading) {
-    return (
-      <div className="flex-1 p-8 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    );
+    return <UsersShimmer />;
   }
 
   return (

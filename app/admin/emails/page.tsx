@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { Send, Loader2, CheckCircle2, XCircle, Eye, X, Search } from "lucide-react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
 import type { EmailTemplateType } from "@/lib/email-templates";
+import { EmailsShimmer } from "@/components/admin/emails-shimmer";
 
 interface User {
   id: string;
@@ -33,10 +37,60 @@ export default function AdminEmailsPage() {
   const [emailSubject, setEmailSubject] = useState("");
   const [emailContent, setEmailContent] = useState("");
   const [sendingEmail, setSendingEmail] = useState(false);
-  const [emailStatus, setEmailStatus] = useState<{
+  const [toast, setToast] = useState<{
     type: "success" | "error";
     message: string;
   } | null>(null);
+
+  // WYSIWYG Editor
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        bulletList: {
+          HTMLAttributes: {
+            class: "list-disc ml-6 space-y-1",
+          },
+        },
+        orderedList: {
+          HTMLAttributes: {
+            class: "list-decimal ml-6 space-y-1",
+          },
+        },
+      }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: "text-emerald-600 underline",
+        },
+      }),
+    ],
+    content: emailContent,
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      setEmailContent(html);
+    },
+    editorProps: {
+      attributes: {
+        class: "tiptap-editor min-h-[400px] p-4",
+      },
+    },
+  });
+
+  // Update editor content when emailContent changes externally (e.g., from template)
+  useEffect(() => {
+    if (editor && emailContent && editor.getHTML() !== emailContent) {
+      editor.commands.setContent(emailContent);
+    }
+  }, [emailContent, editor]);
+
+  // Cleanup editor on unmount
+  useEffect(() => {
+    return () => {
+      if (editor) {
+        editor.destroy();
+      }
+    };
+  }, [editor]);
 
   const replaceVariables = (template: string, vars: Record<string, string>): string => {
     let result = template;
@@ -80,12 +134,10 @@ export default function AdminEmailsPage() {
 
   const fetchUsers = async () => {
     try {
+      // Use cached data with revalidation
       const response = await fetch("/api/admin/users", {
         method: "GET",
-        cache: "no-store",
-        headers: {
-          "Cache-Control": "no-cache",
-        },
+        next: { revalidate: 30 }, // Revalidate every 30 seconds
       });
       if (response.ok) {
         const data = await response.json();
@@ -102,9 +154,10 @@ export default function AdminEmailsPage() {
 
   const fetchTemplates = async () => {
     try {
+      // Templates are cached for 1 hour
       const response = await fetch("/api/admin/email-templates", {
         method: "GET",
-        cache: "no-store",
+        next: { revalidate: 3600 }, // Revalidate every hour
       });
       if (response.ok) {
         const data = await response.json();
@@ -190,23 +243,25 @@ export default function AdminEmailsPage() {
     }
 
     if (!baseSubject || !baseContent) {
-      setEmailStatus({
+      setToast({
         type: "error",
         message: "Please fill in both subject and content",
       });
+      setTimeout(() => setToast(null), 5000);
       return;
     }
 
     if (selectedUsers.size === 0) {
-      setEmailStatus({
+      setToast({
         type: "error",
         message: "Please select at least one user",
       });
+      setTimeout(() => setToast(null), 5000);
       return;
     }
 
     setSendingEmail(true);
-    setEmailStatus(null);
+    setToast(null);
 
     try {
       // For each user, replace {name} and {email} variables
@@ -252,10 +307,11 @@ export default function AdminEmailsPage() {
         }
       }
 
-      setEmailStatus({
+      setToast({
         type: "success",
         message: `Successfully sent ${sent} email(s). ${failed > 0 ? `${failed} failed.` : ""}`,
       });
+      setTimeout(() => setToast(null), 5000);
 
       if (sent > 0) {
         setEmailSubject("");
@@ -265,21 +321,18 @@ export default function AdminEmailsPage() {
         setSelectedTemplate("custom");
       }
     } catch {
-      setEmailStatus({
+      setToast({
         type: "error",
         message: "An error occurred while sending emails",
       });
+      setTimeout(() => setToast(null), 5000);
     } finally {
       setSendingEmail(false);
     }
   };
 
   if (loading) {
-    return (
-      <div className="flex-1 p-8 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-      </div>
-    );
+    return <EmailsShimmer />;
   }
 
   const currentTemplate = templates.find((t) => t.id === selectedTemplate);
@@ -288,13 +341,58 @@ export default function AdminEmailsPage() {
   );
 
   return (
-    <div className="flex-1 p-8">
+    <div className="flex-1 p-8 relative">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-5">
+          <div
+            className={`px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 min-w-[300px] ${
+              toast.type === "success"
+                ? "bg-emerald-500 text-white"
+                : "bg-red-500 text-white"
+            }`}
+          >
+            {toast.type === "success" ? (
+              <CheckCircle2 className="w-5 h-5" />
+            ) : (
+              <XCircle className="w-5 h-5" />
+            )}
+            <span className="flex-1">{toast.message}</span>
+            <button
+              onClick={() => setToast(null)}
+              className="ml-2 hover:opacity-80"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Send Emails</h1>
-        <p className="text-gray-600 mt-1">
-          Send bulk or targeted emails to users using templates
-        </p>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Send Emails</h1>
+          <p className="text-gray-600 mt-1">
+            Send bulk or targeted emails to users using templates
+          </p>
+        </div>
+        <button
+          onClick={sendBulkEmail}
+          disabled={sendingEmail || selectedUsers.size === 0}
+          className="bg-black text-white py-3 px-6 rounded-lg hover:bg-zinc-800 transition-colors font-medium disabled:opacity-60 flex items-center justify-center gap-2 whitespace-nowrap"
+        >
+          {sendingEmail ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            <>
+              <Send className="w-4 h-4" />
+              Send to {selectedUsers.size} user(s)
+            </>
+          )}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -341,40 +439,25 @@ export default function AdminEmailsPage() {
 
             {/* Template Selector */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Select Email Template
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Template
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                <button
-                  onClick={() => setSelectedTemplate("custom")}
-                  className={`p-4 rounded-lg border-2 text-left transition-all ${
-                    selectedTemplate === "custom"
-                      ? "border-emerald-500 bg-emerald-50"
-                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  <div className="font-medium text-gray-900">Custom HTML</div>
-                  <div className="text-xs text-gray-500 mt-1">Write your own HTML email</div>
-                </button>
+              <select
+                value={selectedTemplate}
+                onChange={(e) => setSelectedTemplate(e.target.value as EmailTemplateType | "custom")}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="custom">Custom HTML - Write your own HTML email</option>
                 {templates.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => setSelectedTemplate(template.id)}
-                    className={`p-4 rounded-lg border-2 text-left transition-all ${
-                      selectedTemplate === template.id
-                        ? "border-emerald-500 bg-emerald-50"
-                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    <div className="font-medium text-gray-900">{template.name}</div>
-                    <div className="text-xs text-gray-500 mt-1">{template.description}</div>
-                  </button>
+                  <option key={template.id} value={template.id}>
+                    {template.name} - {template.description}
+                  </option>
                 ))}
-              </div>
+              </select>
               {selectedTemplate !== "custom" && currentTemplate && (
-                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+                <div className="mt-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
                   <div className="text-sm font-medium text-emerald-900">
-                    Selected: {currentTemplate.name}
+                    {currentTemplate.name}
                   </div>
                   <div className="text-xs text-emerald-700 mt-1">
                     {currentTemplate.variables.length > 0
@@ -433,51 +516,118 @@ export default function AdminEmailsPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Content (HTML)
+                Content (WYSIWYG Editor)
               </label>
-              <textarea
-                value={emailContent}
-                onChange={(e) => setEmailContent(e.target.value)}
-                rows={16}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-sm"
-                placeholder="Enter HTML email content or use a template..."
-              />
-            </div>
-
-            {emailStatus && (
-              <div
-                className={`px-4 py-3 rounded-lg text-sm flex items-center gap-2 ${
-                  emailStatus.type === "success"
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "bg-red-50 text-red-700"
-                }`}
-              >
-                {emailStatus.type === "success" ? (
-                  <CheckCircle2 className="w-4 h-4" />
-                ) : (
-                  <XCircle className="w-4 h-4" />
-                )}
-                {emailStatus.message}
-              </div>
-            )}
-
-            <button
-              onClick={sendBulkEmail}
-              disabled={sendingEmail || selectedUsers.size === 0}
-              className="w-full bg-black text-white py-3 px-4 rounded-lg hover:bg-zinc-800 transition-colors font-medium disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {sendingEmail ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  Send to {selectedUsers.size} user(s)
-                </>
+              {/* Toolbar */}
+              {editor && (
+                <div className="border border-gray-300 rounded-t-lg bg-gray-50 p-2 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => editor.chain().focus().toggleBold().run()}
+                    className={`px-3 py-1.5 text-sm rounded hover:bg-gray-200 ${
+                      editor.isActive("bold") ? "bg-gray-300" : ""
+                    }`}
+                    title="Bold"
+                  >
+                    <strong>B</strong>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => editor.chain().focus().toggleItalic().run()}
+                    className={`px-3 py-1.5 text-sm rounded hover:bg-gray-200 ${
+                      editor.isActive("italic") ? "bg-gray-300" : ""
+                    }`}
+                    title="Italic"
+                  >
+                    <em>I</em>
+                  </button>
+                  <div className="w-px h-6 bg-gray-300" />
+                  <button
+                    type="button"
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                    className={`px-3 py-1.5 text-sm rounded hover:bg-gray-200 ${
+                      editor.isActive("heading", { level: 1 }) ? "bg-gray-300" : ""
+                    }`}
+                    title="Heading 1"
+                  >
+                    H1
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                    className={`px-3 py-1.5 text-sm rounded hover:bg-gray-200 ${
+                      editor.isActive("heading", { level: 2 }) ? "bg-gray-300" : ""
+                    }`}
+                    title="Heading 2"
+                  >
+                    H2
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                    className={`px-3 py-1.5 text-sm rounded hover:bg-gray-200 ${
+                      editor.isActive("heading", { level: 3 }) ? "bg-gray-300" : ""
+                    }`}
+                    title="Heading 3"
+                  >
+                    H3
+                  </button>
+                  <div className="w-px h-6 bg-gray-300" />
+                  <button
+                    type="button"
+                    onClick={() => editor.chain().focus().toggleBulletList().run()}
+                    className={`px-3 py-1.5 text-sm rounded hover:bg-gray-200 ${
+                      editor.isActive("bulletList") ? "bg-gray-300" : ""
+                    }`}
+                    title="Bullet List"
+                  >
+                    •
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                    className={`px-3 py-1.5 text-sm rounded hover:bg-gray-200 ${
+                      editor.isActive("orderedList") ? "bg-gray-300" : ""
+                    }`}
+                    title="Numbered List"
+                  >
+                    1.
+                  </button>
+                  <div className="w-px h-6 bg-gray-300" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = window.prompt("Enter URL:");
+                      if (url) {
+                        editor.chain().focus().setLink({ href: url }).run();
+                      }
+                    }}
+                    className={`px-3 py-1.5 text-sm rounded hover:bg-gray-200 ${
+                      editor.isActive("link") ? "bg-gray-300" : ""
+                    }`}
+                    title="Insert Link"
+                  >
+                    🔗
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => editor.chain().focus().unsetLink().run()}
+                    disabled={!editor.isActive("link")}
+                    className="px-3 py-1.5 text-sm rounded hover:bg-gray-200 disabled:opacity-50"
+                    title="Remove Link"
+                  >
+                    Unlink
+                  </button>
+                </div>
               )}
-            </button>
+              {/* Editor */}
+              <div className="border border-t-0 border-gray-300 rounded-b-lg min-h-[400px] bg-white overflow-y-auto">
+                <EditorContent editor={editor} />
+              </div>
+              <p className="mt-2 text-xs text-gray-500">
+                Format your email content visually. HTML will be generated automatically.
+              </p>
+            </div>
           </div>
         </div>
 

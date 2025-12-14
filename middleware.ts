@@ -14,6 +14,11 @@ const isPublicRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
 
+  // Completely bypass Clerk for admin routes (both pages and API) - they have their own authentication
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+    return;
+  }
+
   // Keep blog posts public but require auth for editor
   if (pathname.startsWith("/blog/editor")) {
     await auth.protect();
