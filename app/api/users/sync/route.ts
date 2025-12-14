@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send welcome email for first-time users
+    // Note: New users default to email_subscription_enabled = true, so welcome email is sent
     if (isFirstTime) {
       console.log(`[User Sync] First-time user detected, sending welcome email to ${email}`);
       // Send email asynchronously (don't wait for it)

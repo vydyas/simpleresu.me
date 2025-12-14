@@ -446,6 +446,13 @@ export default function LandingPage() {
               Blog
             </Link>
             <span>|</span>
+            <Link
+              href="/settings"
+              className="hover:text-black transition-colors"
+            >
+              Settings
+            </Link>
+            <span>|</span>
             <a
               href="https://www.linkedin.com/in/siddhucse/"
               target="_blank"

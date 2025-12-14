@@ -15,6 +15,9 @@ interface User {
   clerk_user_id: string;
   created_at: string;
   updated_at: string;
+  email_subscription_enabled?: boolean;
+  first_name?: string;
+  last_name?: string;
 }
 
 export default function AdminDashboardPage() {

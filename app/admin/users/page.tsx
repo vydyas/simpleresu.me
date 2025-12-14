@@ -10,6 +10,9 @@ interface User {
   clerk_user_id: string;
   created_at: string;
   updated_at: string;
+  email_subscription_enabled?: boolean;
+  first_name?: string;
+  last_name?: string;
 }
 
 export default function AdminUsersPage() {
@@ -80,6 +83,9 @@ export default function AdminUsersPage() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -89,20 +95,27 @@ export default function AdminUsersPage() {
                   Joined
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Last Updated
+                  Email Subscribed
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
                     {searchQuery ? "No users found" : "No users yet"}
                   </td>
                 </tr>
               ) : (
                 filteredUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {user.first_name || user.last_name
+                          ? `${user.first_name || ""} ${user.last_name || ""}`.trim()
+                          : "—"}
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {user.email}
@@ -119,9 +132,15 @@ export default function AdminUsersPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {new Date(user.updated_at).toLocaleDateString()}
-                      </div>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          user.email_subscription_enabled !== false
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {user.email_subscription_enabled !== false ? "Subscribed" : "Unsubscribed"}
+                      </span>
                     </td>
                   </tr>
                 ))

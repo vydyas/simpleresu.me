@@ -22,11 +22,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch users by IDs
+    // Fetch users by IDs - only include users who have opted in to emails
     const { data: users, error } = await supabaseAdmin
       .from("users")
-      .select("id, email")
-      .in("id", userIds);
+      .select("id, email, email_subscription_enabled, first_name, last_name")
+      .in("id", userIds)
+      .eq("email_subscription_enabled", true); // Only send to users who opted in
 
     if (error) {
       console.error("[Admin] Error fetching users:", error);

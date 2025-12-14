@@ -14,6 +14,9 @@ interface User {
   clerk_user_id: string;
   created_at: string;
   updated_at: string;
+  email_subscription_enabled?: boolean;
+  first_name?: string;
+  last_name?: string;
 }
 
 interface EmailTemplate {
@@ -265,18 +268,53 @@ export default function AdminEmailsPage() {
 
     try {
       // For each user, replace {name} and {email} variables
+      // Only send to users who have opted in to emails
       const userIds = Array.from(selectedUsers);
-      const selectedUsersData = users.filter((u) => userIds.includes(u.id));
+      const selectedUsersData = users.filter(
+        (u) => userIds.includes(u.id) && u.email_subscription_enabled !== false
+      );
+
+      // Warn if some selected users are unsubscribed
+      const unsubscribedCount = users.filter(
+        (u) => userIds.includes(u.id) && u.email_subscription_enabled === false
+      ).length;
+
+      if (unsubscribedCount > 0) {
+        setToast({
+          type: "error",
+          message: `${unsubscribedCount} selected user${unsubscribedCount !== 1 ? "s have" : " has"} opted out of emails and will not receive this message`,
+        });
+        setTimeout(() => setToast(null), 7000);
+      }
+
+      if (selectedUsersData.length === 0) {
+        setToast({
+          type: "error",
+          message: "No subscribed users selected. All selected users have opted out of emails.",
+        });
+        setTimeout(() => setToast(null), 5000);
+        setSendingEmail(false);
+        return;
+      }
 
       let sent = 0;
       let failed = 0;
       const errors: string[] = [];
 
       for (const user of selectedUsersData) {
+        // Get user's name (first + last, or first, or email prefix, or "there")
+        const userName = user.first_name && user.last_name
+          ? `${user.first_name} ${user.last_name}`
+          : user.first_name
+          ? user.first_name
+          : user.last_name
+          ? user.last_name
+          : user.email.split("@")[0] || "there";
+
         // Replace user-specific variables
         const userVars = {
           ...templateVariables,
-          name: user.email.split("@")[0] || "there",
+          name: userName,
           email: user.email,
         };
 
@@ -416,7 +454,7 @@ export default function AdminEmailsPage() {
                 <div className="text-sm font-medium text-emerald-900 mb-2">
                   {selectedUsers.size} user{selectedUsers.size !== 1 ? "s" : ""} selected
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-2">
                   {users
                     .filter((u) => selectedUsers.has(u.id))
                     .slice(0, 5)
@@ -433,6 +471,9 @@ export default function AdminEmailsPage() {
                       +{selectedUsers.size - 5} more
                     </span>
                   )}
+                </div>
+                <div className="text-xs text-emerald-700">
+                  Note: Only users who have opted in to email notifications will receive emails
                 </div>
               </div>
             )}
@@ -656,6 +697,10 @@ export default function AdminEmailsPage() {
                 {filteredUsers.every((u) => selectedUsers.has(u.id)) ? "Deselect All" : "Select All"}
               </button>
             </div>
+            <div className="mt-2 text-xs text-gray-500">
+              {users.filter((u) => u.email_subscription_enabled !== false).length} subscribed,{" "}
+              {users.filter((u) => u.email_subscription_enabled === false).length} unsubscribed
+            </div>
           </div>
           <div className="space-y-2 max-h-[calc(100vh-300px)] overflow-y-auto">
             {filteredUsers.length === 0 ? (
@@ -683,14 +728,21 @@ export default function AdminEmailsPage() {
                     onChange={() => toggleUserSelection(user.id)}
                     className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
                   />
-                  <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-gray-900 truncate">
                       {user.email}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      Joined: {new Date(user.created_at).toLocaleDateString()}
-                    </p>
+                    {user.email_subscription_enabled === false && (
+                      <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">
+                        Unsubscribed
+                      </span>
+                    )}
                   </div>
+                  <p className="text-xs text-gray-500">
+                    Joined: {new Date(user.created_at).toLocaleDateString()}
+                  </p>
+                </div>
                 </div>
               ))
             )}

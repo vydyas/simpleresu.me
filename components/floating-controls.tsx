@@ -9,7 +9,8 @@ import { RippleButton } from './ui/ripple-button';
 import { fireConfetti } from '@/lib/confetti';
 import { trackEvents } from '@/lib/analytics';
 import Download from 'lucide-react/dist/esm/icons/download';
-import { useAuth, SignInButton } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -29,6 +30,7 @@ export function FloatingControls({
   onZoomChange,
 }: FloatingControlsProps) {
   const { isSignedIn } = useAuth();
+  const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -211,11 +213,15 @@ export function FloatingControls({
             >
               Continue Editing
             </Button>
-            <SignInButton mode="modal">
-              <Button className="bg-black text-white hover:bg-zinc-800">
-                Sign In to Download
-              </Button>
-            </SignInButton>
+            <Button
+              onClick={() => {
+                setShowAuthDialog(false);
+                router.push('/sign-in');
+              }}
+              className="bg-black text-white hover:bg-zinc-800"
+            >
+              Sign In to Download
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

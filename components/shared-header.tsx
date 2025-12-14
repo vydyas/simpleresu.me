@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { CreateResumeModal } from './create-resume-modal';
+import { UserMenu } from './user-menu';
 
 interface SharedHeaderProps {
   variant?: 'landing' | 'builder';
@@ -11,6 +13,12 @@ interface SharedHeaderProps {
 
 export function SharedHeader({}: SharedHeaderProps) {
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const { isSignedIn, isLoaded } = useAuth();
+  const router = useRouter();
+
+  const handleSignIn = () => {
+    router.push('/sign-in');
+  };
 
   return (
     <>
@@ -25,16 +33,20 @@ export function SharedHeader({}: SharedHeaderProps) {
             </Link>
 
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="px-4 sm:px-6 py-2 text-sm sm:text-base bg-black text-white rounded-lg hover:bg-zinc-800 transition-all duration-200 font-medium">
-                    Sign In
-                  </button>
-                </SignInButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
+              {isLoaded && (
+                <>
+                  {!isSignedIn ? (
+                    <button
+                      onClick={handleSignIn}
+                      className="px-4 sm:px-6 py-2 text-sm sm:text-base bg-black text-white rounded-lg hover:bg-zinc-800 transition-all duration-200 font-medium"
+                    >
+                      Sign In
+                    </button>
+                  ) : (
+                    <UserMenu />
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

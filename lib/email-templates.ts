@@ -68,6 +68,21 @@ function getEmailBaseTemplate(content: string): string {
               <p style="margin: 0; color: #9b9b9b; font-size: 11px;">
                 © ${new Date().getFullYear()} SimpleResu.me. All rights reserved.
               </p>
+              <!-- Unsubscribe Section -->
+              <div style="margin: 20px 0 0 0; padding-top: 20px; border-top: 1px solid #e5e5e5;">
+                <p style="margin: 0 0 10px 0; color: #6b6b6b; font-size: 12px; line-height: 1.6;">
+                  You're receiving this email because you're subscribed to SimpleResu.me updates.
+                </p>
+                <p style="margin: 0; color: #6b6b6b; font-size: 12px;">
+                  <a href="https://simpleresu.me/settings" style="color: #10b981; text-decoration: underline;">
+                    Manage email preferences
+                  </a>
+                  <span style="color: #ccc; margin: 0 8px;">|</span>
+                  <a href="https://simpleresu.me/settings" style="color: #10b981; text-decoration: underline;">
+                    Unsubscribe from emails
+                  </a>
+                </p>
+              </div>
             </td>
           </tr>
         </table>

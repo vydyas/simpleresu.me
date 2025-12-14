@@ -7,7 +7,7 @@ const getCachedUsers = unstable_cache(
   async () => {
     const { data: users, error } = await supabaseAdmin
       .from("users")
-      .select("id, email, clerk_user_id, created_at, updated_at")
+      .select("id, email, clerk_user_id, created_at, updated_at, email_subscription_enabled, first_name, last_name")
       .order("created_at", { ascending: false });
 
     if (error) {
