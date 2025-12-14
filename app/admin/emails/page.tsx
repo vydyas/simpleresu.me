@@ -379,26 +379,26 @@ export default function AdminEmailsPage() {
   );
 
   return (
-    <div className="flex-1 p-8 relative">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8 relative">
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-5">
+        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-5 max-w-[calc(100vw-2rem)]">
           <div
-            className={`px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 min-w-[300px] ${
+            className={`px-4 py-3 rounded-lg shadow-lg text-sm flex items-center gap-2 min-w-[280px] max-w-full ${
               toast.type === "success"
                 ? "bg-emerald-500 text-white"
                 : "bg-red-500 text-white"
             }`}
           >
             {toast.type === "success" ? (
-              <CheckCircle2 className="w-5 h-5" />
+              <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
             ) : (
-              <XCircle className="w-5 h-5" />
+              <XCircle className="w-5 h-5 flex-shrink-0" />
             )}
-            <span className="flex-1">{toast.message}</span>
+            <span className="flex-1 break-words">{toast.message}</span>
             <button
               onClick={() => setToast(null)}
-              className="ml-2 hover:opacity-80"
+              className="ml-2 hover:opacity-80 flex-shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
@@ -407,40 +407,41 @@ export default function AdminEmailsPage() {
       )}
 
       {/* Header */}
-      <div className="mb-8 flex justify-between items-start">
+      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Send Emails</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Send Emails</h1>
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">
             Send bulk or targeted emails to users using templates
           </p>
         </div>
         <button
           onClick={sendBulkEmail}
           disabled={sendingEmail || selectedUsers.size === 0}
-          className="bg-black text-white py-3 px-6 rounded-lg hover:bg-zinc-800 transition-colors font-medium disabled:opacity-60 flex items-center justify-center gap-2 whitespace-nowrap"
+          className="bg-black text-white py-3 px-4 sm:px-6 rounded-lg hover:bg-zinc-800 transition-colors font-medium disabled:opacity-60 flex items-center justify-center gap-2 whitespace-nowrap text-sm sm:text-base"
         >
           {sendingEmail ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Sending...
+              <span className="hidden sm:inline">Sending...</span>
             </>
           ) : (
             <>
               <Send className="w-4 h-4" />
-              Send to {selectedUsers.size} user(s)
+              <span className="hidden sm:inline">Send to {selectedUsers.size} user(s)</span>
+              <span className="sm:hidden">Send ({selectedUsers.size})</span>
             </>
           )}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
         {/* Email Composer - Left Side (2/3 width) */}
-        <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Compose Email</h2>
+        <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900">Compose Email</h2>
             <button
               onClick={() => setShowPreviewModal(true)}
-              className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors w-full sm:w-auto"
             >
               <Eye className="w-4 h-4" />
               Preview
@@ -673,7 +674,7 @@ export default function AdminEmailsPage() {
         </div>
 
         {/* Users List - Right Side (1/3 width) */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
           <div className="mb-4">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Select Users</h2>
             <div className="relative">
@@ -755,9 +756,9 @@ export default function AdminEmailsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col">
             {/* Modal Header */}
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-200">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Email Preview</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Email Preview</h2>
                 <p className="text-sm text-gray-600 mt-1">
                   Preview how your email will look
                 </p>
